@@ -1,13 +1,10 @@
-import { createContext, useEffect, useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import { Firestore } from 'firebase/firestore'
+import { createContext, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
-
 import Home from './components/Home'
 import Room from './components/Room'
 import initializeFirebase from './firebase/firebaseApp'
-import { Firestore } from 'firebase/firestore'
-import { FirebaseApp } from 'firebase/app'
+
 
 const [app, db] = initializeFirebase();
 
@@ -15,22 +12,33 @@ const AppContext = createContext<Memo>({} as Memo);
 
 function App() {
 
+  const [username, setUsername] = useState('');
+  const [localStream, setLocalStream] = useState(null);
+
   const memo = {
     db,
+    username, setUsername,
+    localStream, setLocalStream,
   };
 
   return (
-    <AppContext.Provider value={memo}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/:roomId" element={<Room />} />
-      </Routes>
+    <AppContext.Provider value={memo as Memo}>
+      <div className="App-header">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/:roomId" element={<Room />} />
+        </Routes>
+      </div>
     </AppContext.Provider>
   )
 }
 
 interface Memo {
   db: Firestore | any;
+  username: string;
+  setUsername: (username: string) => void;
+  localStream: MediaStream | null;
+  setLocalStream: (localStream: MediaStream | null) => void;
 }
 
 export default App
