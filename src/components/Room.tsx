@@ -94,6 +94,8 @@ export default function Room() {
             const otherUserIds = Object.values(userIds).filter(key => key !== peerId);
             const newUserIds = otherUserIds.filter(peerId => !remotePeers.includes(peerId));
             console.log(newUserIds);
+            connectToNewUser(myPeer, newUserIds, localStream);
+            setRemotePeers(remotePeers.concat(newUserIds));
           }
         })
 
@@ -188,25 +190,29 @@ export default function Room() {
   )
 }
 
-function connectToNewUser(myPeer: Peer, userId: string, stream: MediaStream,
-   videoGrid: HTMLElement | null) {
-  const call = myPeer.call(userId, stream);
-  const video = document.createElement('video');
-  call.on('stream', userVideoStream => {
-    addVideoStream(video, userVideoStream, videoGrid);
-  })
-  call.on('close', () => {
-    video.remove();
-  })
-}
+function connectToNewUser(myPeer: Peer, remoteUserIds: string[], localStream: MediaStream) {
 
-function addVideoStream(video: HTMLVideoElement, stream: MediaStream, 
-  videoGrid: HTMLElement | null) {
-  video.srcObject = stream;
-  video.addEventListener('loadedmetadata', () => {
-    video.play();
-  })
-  videoGrid?.append(video);
+  const remoteStreams = document.getElementById('remote-streams') as HTMLUListElement;
+  if (remoteStreams) {
+    remoteUserIds.forEach(remoteId => {
+
+      const call = myPeer.call(remoteId, localStream);
+
+      const newListItem = document.createElement('li');
+      const newRemoteVideo = document.createElement('video');
+
+      call.on('stream', remoteUserStream => {
+        newRemoteVideo.srcObject = remoteUserStream;
+        newListItem.appendChild(newRemoteVideo);
+        remoteStreams.appendChild(newListItem);
+      });
+
+      call.on('close', () => {
+        newRemoteVideo.remove();
+        newListItem.remove();
+      });
+    })
+  }
 }
 
 async function getLocalVideo() {
@@ -220,3 +226,11 @@ function copyToClipboard() {
     navigator.clipboard.writeText(shareLinkElement.value);
   }
 }
+// function addVideoStream(video: HTMLVideoElement, stream: MediaStream, 
+//   videoGrid: HTMLElement | null) {
+//   video.srcObject = stream;
+//   video.addEventListener('loadedmetadata', () => {
+//     video.play();
+//   })
+//   videoGrid?.append(video);
+// }

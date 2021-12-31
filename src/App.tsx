@@ -3,6 +3,7 @@ import { createContext, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './components/Home'
 import Room from './components/Room'
+import RoomWithoutUsername from './components/RoomWithoutUsername'
 import initializeFirebase from './firebase/firebaseApp'
 
 
@@ -12,7 +13,7 @@ const AppContext = createContext<Memo>({} as Memo);
 
 function App() {
 
-  const [username, setUsername] = useState('defaultUsername');
+  const [username, setUsername] = useState('');
   const [localStream, setLocalStream] = useState(null);
 
   const memo = {
@@ -26,7 +27,13 @@ function App() {
       <div className="App-header">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/:roomId" element={<Room />} />
+          <Route path="/:roomId">
+            {
+              username.length > 0 ?
+                <Route path="/:roomId" element={<Room />} /> :
+                <Route path="/:roomId" element={<RoomWithoutUsername />} />
+            }
+          </Route>
         </Routes>
       </div>
     </AppContext.Provider>

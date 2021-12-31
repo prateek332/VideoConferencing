@@ -26,10 +26,11 @@ export default function Home() {
     localStream, setLocalStream,
   } = useContext(AppContext);
 
-  // useEffect(() => {
-  //   getCallDoc(db)
-  //     .then(callDocRef => navigate(`/${callDocRef.id}`));
-  // }, [])
+  // checking if username is saved in local storage
+  useEffect(() => {
+    setUsername(getUsername());
+  },[]);
+
 
   const onUsernameSubmit = () => {
     if (_onUsernameSubmit(username)) {
@@ -167,22 +168,18 @@ export default function Home() {
   );
 }
 
+function getUsername(): string {
+  const username = localStorage.getItem('username');
+  return username ? username : '';
+}
+
 function _onUsernameSubmit(username: string) {
 
   if (username.length < 5 || username.length > 20) {
     return false;
   } 
-
-  // save username for future use
+  // save username for the next time user visits the site
   localStorage.setItem('username', username);
-
-  // disable local stream video before moving to chat page
-  // const video = document.getElementById('localStreamHome') as HTMLVideoElement;
-  // if (video.srcObject) {
-  //   const stream = video.srcObject as MediaStream;
-  //   stream.getTracks().forEach(track => track.stop());
-  //   video.remove();
-  // }
   return true;
 }
 
