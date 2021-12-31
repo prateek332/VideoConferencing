@@ -1,7 +1,16 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { useState, Fragment } from "react";
 
-export default function MyDialog(props) {
+interface DialogProps {
+  isOpen: boolean;
+  closeDialog: () => void;
+  title: string;
+  description: string;
+  buttonMessage: string;
+  children: any;
+}
+
+export default function MyDialog(props: DialogProps) {
 
   const {
     isOpen,
@@ -45,7 +54,7 @@ export default function MyDialog(props) {
                   {title || "Default modal title"}
                 </Dialog.Title>
 
-                {props.children ? props.children : null}
+                {children ? children : null}
                 <Dialog.Description className="ml-2 text-red-500 font-light mb-5">
                   {description ? description : null}
                 </Dialog.Description>
