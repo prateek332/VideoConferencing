@@ -33,7 +33,7 @@ code {
 }
 
 #streams {
-  grid-row: 1 / span 5;
+  grid-row: 1/ span 5;
   display: grid;
   grid-template-columns: repeat(1, 1fr); /* dynamically change this property when new users are added */
   grid-auto-rows: 1fr;
@@ -42,7 +42,10 @@ code {
 }
 
 #streams video {
-  @apply rounded-3xl border-2 border-lime-400 object-cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  @apply border-2 border-lime-400 rounded-xl transition ease-in-out hover:scale-125;
 }
 
 .waves-background {

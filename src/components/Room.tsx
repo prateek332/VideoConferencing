@@ -11,9 +11,6 @@ import appConfig from "../app.config";
 
 import Peer from 'peerjs';
 
-const allVideosStyle = "w-full h-full object-cover object-center";
-const streamsGridStyle = "border-2 row-span-5 grid";
-
 export default function Room() {
 
   const {
@@ -24,8 +21,7 @@ export default function Room() {
 
   const params = useParams();
   let myPeer: Peer | undefined;
-  let videoGrid: HTMLElement | null;
-  const [roomId, setRoomId] = useState('');
+  let videoGrid: HTMLElement | null;  
 
   // useEffect(() => {
   //   setTimeout(() => testAddMoreRemoteVideos(), 3000)
@@ -56,54 +52,38 @@ export default function Room() {
         })
     }
   }, [localStream]);
-
-
   
   // generate peerId and write it to firestore and listen for new connections
-  // useLayoutEffect(() => {
-  //   if (localStream !== null) {  
-  //     if (params.roomId === undefined || params.roomId === "" || params.roomId === null) {
-  //     // navigate back to home cause something is wrong
-  //     } else {
+  useLayoutEffect(() => {
+    if (localStream !== null) {
+      if (params.roomId === undefined || params.roomId === "" || params.roomId === null) {
+      // navigate back to home cause something is wrong
+      } else {
 
-  //       // create a new Peer for this user
-  //       myPeer = new Peer();
-  //       // open peer connection and write peer to firestore
-  //       myPeer.on('open', peerId => {
-  //         addMyPeerDocument(db, params.roomId as string, username, peerId)
-  //           .then(doc => {
-  //             // if document was added successfully then set a snapshot listener for new remote ids
-  //             if (doc && params.roomId !== undefined)  {
-  //               // setup a snapshot listener for new peerIds
-  //               const q = query(collection(db, appConfig.callDocument, params.roomId, appConfig.newConnections));
-  //               const unsubscribe = onSnapshot(q, async snapshot => {
-  //                 snapshot.docChanges().forEach(async change => {
-  //                   if (change.type === 'added') {
-  //                     const remotePeerIdsArray = Object.values(change.doc.data()).filter(value => value !== peerId);
-  //                     console.log(remotePeerIdsArray);
-  //                     connectToNewUser(myPeer, remotePeerIdsArray, localStream);
-  //                   }
-  //                 });
-  //               });
-  //             } else {
-  //               console.log("error adding document");
-  //             }
-  //           })
-  //       });
+        // create a new Peer for this user
+        myPeer = new Peer();
+        // open peer connection and write peer to firestore
+        myPeer.on('open', peerId => {
+          addMyPeerDocument(db, params.roomId as string, username, peerId)
+            .then(doc => {
+              // if document was added successfully then set a snapshot listener for new remote ids
+              if (doc && params.roomId !== undefined)  {
+                // setup a snapshot listener for new peerIds
+                setRemotePeerSnapshotListener(db, myPeer, params.roomId, localStream);
+              } else {
+                console.log("error adding myPeerId to firestore document");
+              }
+            })
+        });
 
-  //       // whenever we receive a call, we answer back with out localStream MediaStream
-  //       myPeer.on('call', call => {
-  //         call.answer(localStream);
-  //       })
+        // whenever we receive a call, we answer back with out localStream MediaStream
+        myPeer.on('call', call => {
+          call.answer(localStream);
+        })
 
-  //       params.roomId ? setRoomId(params.roomId) : setRoomId('');
-
-  //     }
-  //   }
-  // }, [localStream]);
-
-
-
+      }
+    }
+  }, [localStream]);
 
   return (
     <div className="waves-background grid grid-cols-1 grid-rows-6 w-full h-full justify-items-center">
@@ -114,7 +94,6 @@ export default function Room() {
       >
         <video
           id="localStreamRoom" autoPlay playsInline poster={localStreamPosterIcon}
-          className={`${allVideosStyle}`}
         />
       </div>
 
@@ -161,6 +140,11 @@ export default function Room() {
   )
 }
 
+async function getLocalVideo() {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true});
+  return stream;
+}
+
 function testAddMoreRemoteVideos() {
   const streams = document.getElementById("streams") as HTMLDivElement;
   if (streams) {
@@ -170,11 +154,77 @@ function testAddMoreRemoteVideos() {
     video.muted = true;
     video.loop = true;
     video.play();
-    video.setAttribute('class', allVideosStyle);
+    // video.setAttribute('class', allVideosStyle);
 
     streams.appendChild(video);
     
     adjustVideoGridLayout(streams.childElementCount, streams);
+  }
+}
+
+async function addMyPeerDocument(db: Firestore, roomId: string, username: string,  myPeerId: string) {
+
+  const {
+    callDocument,
+    newConnections: newConnectionsDoc,
+  } = appConfig
+
+  const docRef = await addDoc(collection(db, callDocument, roomId, newConnectionsDoc ), {
+    [username]: myPeerId,
+  });
+
+  return docRef !== undefined ? true : false;
+}
+
+function setRemotePeerSnapshotListener(db: Firestore, myPeer: Peer | undefined, roomId: string, localStream: MediaStream) {
+  if (myPeer) {
+    const q = query(collection(db, appConfig.callDocument, roomId, appConfig.newConnections));
+    const unsubscribe = onSnapshot(q, async snapshot => {
+      snapshot.docChanges().forEach(async change => {
+        if (change.type === 'added') {
+          const remotePeerIdsArray = Object.values(change.doc.data()).filter(value => value !== myPeer.id);
+          connectToNewUser(myPeer, remotePeerIdsArray, localStream);
+        }
+      })
+    })
+  } else {
+    console.log('myPeer is undefined');
+  }
+}
+
+async function connectToNewUser(myPeer: Peer | undefined, remoteUserIds: string[], localStream: MediaStream) {
+ 
+  if (myPeer) {
+
+    const streams = document.getElementById('streams') as HTMLDivElement;
+    
+    if (streams !== null) {
+
+      remoteUserIds.forEach(remoteId => {
+
+        const call = myPeer.call(remoteId, localStream);
+
+        const newRemoteVideo = document.createElement('video');
+        
+        call.on('stream', remoteUserStream => {
+          newRemoteVideo.srcObject = remoteUserStream;
+          newRemoteVideo.addEventListener('loadedmetadata', () => {
+            newRemoteVideo.play();
+          })
+          adjustVideoGridLayout(streams.childElementCount + 1, streams);
+          streams.appendChild(newRemoteVideo);
+        });
+
+        call.on('close', () => {
+          if (newRemoteVideo) {
+            newRemoteVideo.remove();
+            adjustVideoGridLayout(streams.childElementCount, streams);
+          }
+        });
+
+      })
+    }
+
   }
 }
 
@@ -225,74 +275,10 @@ function _adjustStreamsGridUtility(numberOfElem: number, screenWidth: number, st
   }
 }
 
-async function addMyPeerDocument(db: Firestore, roomId: string, username: string,  myPeerId: string) {
-
-  const {
-    callDocument,
-    newConnections: newConnectionsDoc,
-  } = appConfig
-
-  const docRef = await addDoc(collection(db, callDocument, roomId, newConnectionsDoc ), {
-    [username]: myPeerId,
-  });
-
-  return docRef !== undefined ? true : false;
-}
-
-async function connectToNewUser(myPeer: Peer | undefined, remoteUserIds: string[], localStream: MediaStream) {
- 
-  if (myPeer) {
-
-    const remoteStreamsList = document.getElementById("remoteStreamsList") as HTMLUListElement;
-    console.log(remoteStreamsList.childElementCount);
-    if (remoteStreamsList !== null) {
-
-      remoteUserIds.forEach(remoteId => {
-
-        const call = myPeer.call(remoteId, localStream);
-
-        const newRemoteVideo = document.createElement('video');
-        const newRemoteVideoListItem = document.createElement('li');
-        
-        call.on('stream', remoteUserStream => {
-
-          newRemoteVideo.srcObject = remoteUserStream;
-          newRemoteVideoListItem.appendChild(newRemoteVideo);
-          remoteStreamsList.appendChild(newRemoteVideoListItem);
-          
-          newRemoteVideo.addEventListener('loadedmetadata', () => {
-            newRemoteVideo.play();
-          })
-          
-          // addVideoStream(newRemoteVideo, remoteUserStream, videoGrid);
-        });
-
-        call.on('close', () => {
-          newRemoteVideo.remove();
-          newRemoteVideoListItem.remove();
-        });
-      })
-    }
-
-  }
-}
-
-async function getLocalVideo() {
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true});
-  return stream;
-}
 
 function copyToClipboard() {
   const shareLinkElement = document.getElementById("shareLink") as HTMLInputElement;
   if (shareLinkElement) {
     navigator.clipboard.writeText(shareLinkElement.value);
   }
-}
-
-function addVideoStream(video: HTMLVideoElement, stream: MediaStream, videoGrid: HTMLElement | null) {
-  video.srcObject = stream;
-  video.addEventListener('loadedmetadata', () => {
-    video.play();
-  })
-  videoGrid?.append(video);
 }
