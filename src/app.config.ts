@@ -20,7 +20,7 @@ const config = {
 	'firebaseConfig': firebaseConfig,
 	'servers': servers,
 	'callDocument': 'calls',
-	'iceCandidates': 'iceCandidates',
+	'newConnections': 'newConnections',
 	'noOfRemoteStreams': 1,
 }
 

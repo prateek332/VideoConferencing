@@ -13,7 +13,7 @@ const AppContext = createContext<Memo>({} as Memo);
 
 function App() {
 
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState('default username');
   const [localStream, setLocalStream] = useState(null);
 
   const memo = {
