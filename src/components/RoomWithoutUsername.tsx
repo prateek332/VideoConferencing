@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../App";
 import MyDialog from "./Dialog/MyDialog";
@@ -12,7 +12,7 @@ export default function RoomWithoutUsername() {
   // grab reference call document from url
   let urlParams = useParams();
 
-  const [usernameInput, setUsernameInput] = useState(username);
+  const [usernameInput, setUsernameInput] = useState(getUsername());
   
   const navigate = useNavigate();
   
@@ -41,41 +41,39 @@ export default function RoomWithoutUsername() {
   }
 
   return (
-    <div className="waves-background flex flex-col md:flex-row flex-wrap justify-center items-center md:h-full">
-      <div className="fixed inset-0 flex items-center justify-center">
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md bg-opacity-20 hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-        >
-          Open dialog
-        </button>
-      </div>
-      <MyDialog 
-        isOpen={isOpen} 
+    <div className="waves-background flex h-full">
+      <MyDialog
+        isOpen={isOpen}
+        outsideClickClose={false}
         closeDialog={onUsernameSubmit}
         title="Enter Username"
         description={description}
-        children={inputUsername(username, setUsernameInput)}
+        children={inputUsername(usernameInput, setUsernameInput)}
+        submitButton
         buttonMessage="Submit"
       />
   </div>
   )
 }
 
-function inputUsername(username: string, setUsernameInput: (username: string) => void) {
+function inputUsername(usernameInput: string, setUsernameInput: (username: string) => void) {
   return (
     <div className="flex flex-col items-center justify-center">
-      <label htmlFor="username" className="text-sm font-medium text-gray-600">
+      <label htmlFor="username" className="text-2xl font-medium text-gray-600">
         Username
       </label>
       <input
         type="text"
-        defaultValue={username}
+        defaultValue={usernameInput}
         onChange={(e) => setUsernameInput(e.target.value)}
         className="mt-1 px-4 py-2 text-sm font-medium text-gray-800 bg-white rounded-md border-2 border-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75"
         placeholder="Enter username"
       />
     </div>
   )
+}
+
+function getUsername(): string {
+  const username = localStorage.getItem('username');
+  return username ? username : '';
 }

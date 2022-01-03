@@ -33,7 +33,7 @@ export default function Home() {
 
 
   const onUsernameSubmit = () => {
-    if (_onUsernameSubmit(username)) {
+    if (_onUsernameSubmitUtility(username)) {
       getCallDoc(db)
         .then(callDocRef => navigate(`/${callDocRef.id}`));
     } else {
@@ -44,7 +44,7 @@ export default function Home() {
   const onRoomIdSubmit = () => {
     const roomId = roomIdRef.current?.value;
     if (roomId !== undefined) {
-      _onRoomIdSubmit(db, roomId)
+      _onRoomIdSubmitUtility(db, roomId)
         .then(roomExists => {
           if (roomExists){
             navigate(`/${roomId}`);
@@ -105,7 +105,7 @@ export default function Home() {
         {/* room id input box */}
         <div className="p-2 m-2 w-72 md:w-9/12 flex flex-col items-center">
           <div className="text-center text-3xl">
-            Enter a room id to join a chat room
+            Enter room-link or room-id to join a chat room
           </div>
           <div className="flex justify-center items-center">
             <input
@@ -173,17 +173,18 @@ function getUsername(): string {
   return username ? username : '';
 }
 
-function _onUsernameSubmit(username: string) {
+function _onUsernameSubmitUtility(username: string) {
 
   if (username.length < 5 || username.length > 20) {
     return false;
   } 
   // save username for the next time user visits the site
   localStorage.setItem('username', username);
+
   return true;
 }
 
-async function _onRoomIdSubmit(db: Firestore, roomId: string) {
+async function _onRoomIdSubmitUtility(db: Firestore, roomId: string) {
   const roomIdString = roomId.split('/').reverse()[0];
 
   let docSnap;

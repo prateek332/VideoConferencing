@@ -4,8 +4,10 @@ import { useState, Fragment } from "react";
 interface DialogProps {
   isOpen: boolean;
   closeDialog: () => void;
+  outsideClickClose: boolean;
   title: string;
   description: string;
+  submitButton: boolean;
   buttonMessage: string;
   children: any;
 }
@@ -15,10 +17,12 @@ export default function MyDialog(props: DialogProps) {
   const {
     isOpen,
     closeDialog,
+    outsideClickClose,
     title,
     description,
     children,
-    buttonMessage
+    buttonMessage,
+    submitButton,
   } = props;
 
   return (
@@ -26,7 +30,7 @@ export default function MyDialog(props: DialogProps) {
       <Transition show={isOpen}>
         <Dialog 
           open={isOpen} 
-          onClose={() => null}
+          onClose={() => outsideClickClose ? closeDialog() : null}
           className="fixed flex items-center justify-center z-10 inset-0 overflow-y-auto"
         >
           <div className="flex items-center justify-center">
@@ -38,7 +42,7 @@ export default function MyDialog(props: DialogProps) {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Dialog.Overlay className="fixed inset-0 bg-slate-600 bg-opacity-50" />
+              <Dialog.Overlay className="fixed inset-0 bg-slate-700 bg-opacity-20" />
             </Transition.Child>
 
             <Transition.Child
@@ -50,7 +54,7 @@ export default function MyDialog(props: DialogProps) {
               leaveTo="opacity-0 scale-95"
             >
               <div className="p-4 relative bg-white rounded-xl max-w-sm mx-auto">
-                <Dialog.Title className="text-3xl font-semibold mb-5">
+                <Dialog.Title className="text-4xl font-semibold mb-5">
                   {title || "Default modal title"}
                 </Dialog.Title>
 
@@ -59,10 +63,13 @@ export default function MyDialog(props: DialogProps) {
                   {description ? description : null}
                 </Dialog.Description>
 
-                <button 
-                  onClick={closeDialog}
-                  className="p-2 font-semibold rounded-2xl bg-green-400 transition hover:scale-110 hover:bg-green-300" 
-                >{buttonMessage || "Default button message"}</button>
+                {
+                  submitButton && 
+                    <button 
+                      onClick={closeDialog}
+                      className="p-2 font-semibold rounded-2xl bg-green-400 transition hover:scale-110 hover:bg-green-300" 
+                    >{buttonMessage || "Default button message"}</button>
+                }
               </div>
             
             </Transition.Child>
