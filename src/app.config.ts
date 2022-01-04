@@ -21,7 +21,7 @@ const config = {
 	'servers': servers,
 	'callDocument': 'calls',
 	'newConnections': 'newConnections',
-	'noOfRemoteStreams': 1,
+	'removeConnections': 'removeConnections',
 }
 
 export default Object.freeze(config);

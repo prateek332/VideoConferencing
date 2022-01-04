@@ -1,6 +1,6 @@
 import { addDoc, collection, doc, DocumentReference, Firestore, onSnapshot, query, setDoc, startAfter, updateDoc } from "firebase/firestore";
 import { useContext, useEffect, useLayoutEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { AppContext } from "../App";
 
 import cameraIcon from '../assets/icons/camera.svg';
@@ -13,6 +13,8 @@ import Peer from 'peerjs';
 
 export default function Room() {
 
+  const navigate = useNavigate();
+
   const {
     db,
     localStream, setLocalStream,
@@ -21,22 +23,6 @@ export default function Room() {
 
   const params = useParams();
   let myPeer: Peer | undefined;
-  let videoGrid: HTMLElement | null;  
-
-  // useEffect(() => {
-  //   setTimeout(() => testAddMoreRemoteVideos(), 3000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 4000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 5000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 6000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 7000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 8000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 9000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 10000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 11000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 12000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 13000)
-  //   setTimeout(() => testAddMoreRemoteVideos(), 14000)
-  // }, []);
   
   // get local video stream, set it to localStream and display it on the page
   useLayoutEffect(() => {
@@ -54,35 +40,45 @@ export default function Room() {
   }, [localStream]);
   
   // generate peerId and write it to firestore and listen for new connections
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (localStream !== null) {
       if (params.roomId === undefined || params.roomId === "" || params.roomId === null) {
-      // navigate back to home cause something is wrong
+        // navigate back to home cause something is wrong
+        navigate("/");
       } else {
 
         // create a new Peer for this user
         myPeer = new Peer();
-        // open peer connection and write peer to firestore
+        
+        // when peer connected then write details to firestore and setup snapshot listeners
         myPeer.on('open', peerId => {
-          addMyPeerDocument(db, params.roomId as string, username, peerId)
+
+          addMyPeerDocument(db, params.roomId as string, username, myPeer)
             .then(doc => {
-              // if document was added successfully then set a snapshot listener for new remote ids
+
+              // if document was added successfully then set a snapshot listeners
               if (doc && params.roomId !== undefined)  {
+
                 // setup a snapshot listener for new peerIds
-                setRemotePeerSnapshotListener(db, myPeer, params.roomId, localStream);
+                setNewConnectionsSnapshotListener(db, myPeer, params.roomId, localStream);
+
+                // setup a snapshot listener for removing connections
+                setRemoveConnectionSnapshotListener(db, myPeer, params.roomId);
+
               } else {
-                console.log("error adding myPeerId to firestore document");
+                console.log("error adding myPeerId document to firestore");
               }
             })
         });
 
-        // whenever we receive a call, we answer back with out localStream MediaStream
+        // setup call answering event listener
         myPeer.on('call', call => {
           call.answer(localStream);
         })
 
       }
     }
+
   }, [localStream]);
 
   return (
@@ -105,12 +101,18 @@ export default function Room() {
           {/* camera, hangup */}
           <div className="w-full sm:w-56 md:w-64 flex justify-evenly items-center mb-3">
             <div className="p-1 bg-green-500 rounded-full transition ease-in-out hover:scale-125">
-              <button id="camButton">
+              <button 
+                id="camButton"
+                onClick={() => null}
+              >
                 <img src={cameraIcon} className="w-12 h-10" alt="camera"/>
               </button>
             </div>
             <div className="p-1 bg-red-500 rounded-full transition ease-in-out hover:scale-125">
-              <button id="hangupButton">
+              <button 
+                id="hangupButton"
+                onClick={() => disconnectMyCall(db, myPeer, params.roomId as string, username, navigate)}
+              >
                 <img src={phoneHangupIcon} className="w-12 h-10" alt="hangup"/>
               </button>
             </div>
@@ -145,24 +147,27 @@ async function getLocalVideo() {
   return stream;
 }
 
-function testAddMoreRemoteVideos() {
-  const streams = document.getElementById("streams") as HTMLDivElement;
-  if (streams) {
-    const video = document.createElement("video") as HTMLVideoElement;
-
-    video.src = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-    video.muted = true;
-    video.loop = true;
-    video.play();
-    // video.setAttribute('class', allVideosStyle);
-
-    streams.appendChild(video);
-    
-    adjustVideoGridLayout(streams.childElementCount, streams);
-  }
+async function removeLocalVideo() {
+  const localStream = document.getElementById("localStreamRoom") as HTMLVideoElement; 
+  localStream.srcObject = null;
+  localStream.remove();
 }
 
-async function addMyPeerDocument(db: Firestore, roomId: string, username: string,  myPeerId: string) {
+function disconnectMyCall(db: Firestore, myPeer: Peer | undefined, roomId: string, username: string, navigate: any) {
+  addDisconnectCallDocument(db, roomId, username, myPeer)
+    .then(res => {
+      if (res == true) {
+        removeLocalVideo();
+        navigate('/');
+      }
+      else
+        console.log('cannot disconnect, something went wrong');
+    })
+}
+
+async function addMyPeerDocument(db: Firestore, roomId: string, username: string,  myPeer: Peer | undefined) {
+
+  if (myPeer === undefined) return false;
 
   const {
     callDocument,
@@ -170,25 +175,81 @@ async function addMyPeerDocument(db: Firestore, roomId: string, username: string
   } = appConfig
 
   const docRef = await addDoc(collection(db, callDocument, roomId, newConnectionsDoc ), {
-    [username]: myPeerId,
+    [username]: myPeer.id,
   });
 
   return docRef !== undefined ? true : false;
 }
 
-function setRemotePeerSnapshotListener(db: Firestore, myPeer: Peer | undefined, roomId: string, localStream: MediaStream) {
+function setNewConnectionsSnapshotListener(db: Firestore, myPeer: Peer | undefined, roomId: string, localStream: MediaStream) {
   if (myPeer) {
     const q = query(collection(db, appConfig.callDocument, roomId, appConfig.newConnections));
     const unsubscribe = onSnapshot(q, async snapshot => {
       snapshot.docChanges().forEach(async change => {
         if (change.type === 'added') {
-          const remotePeerIdsArray = Object.values(change.doc.data()).filter(value => value !== myPeer.id);
+          const remotePeerIdsArray = Object.values(change.doc.data());
           connectToNewUser(myPeer, remotePeerIdsArray, localStream);
         }
       })
     })
   } else {
     console.log('myPeer is undefined');
+  }
+}
+
+async function addDisconnectCallDocument(db: Firestore, roomId: string, username: string, myPeer: Peer | undefined) {
+
+  if (myPeer === undefined) return false;
+
+  const {
+    callDocument,
+    removeConnections: removeConnectionsDoc,
+  } = appConfig
+
+  const docRef = await addDoc(collection(db, callDocument, roomId, removeConnectionsDoc ), {
+    [username]: myPeer.id,
+  });
+  return docRef !== undefined ? true : false;
+}
+
+function setRemoveConnectionSnapshotListener(db: Firestore, myPeer:Peer | undefined, roomId: string) {
+  if (myPeer) {
+    const q = query(collection(db, appConfig.callDocument, roomId, appConfig.removeConnections));
+    const unsubscribe = onSnapshot(q, async snapshot => {
+      snapshot.docChanges().forEach(async change => {
+        if (change.type === 'added') {
+          const remotePeerIdsArray = Object.values(change.doc.data());
+          removeConnection(remotePeerIdsArray);
+        }
+      })
+    })
+  } else {
+    console.log('myPeer is undefined. cannot remove connection');
+  }
+}
+
+async function removeConnection(remotePeerIdsArray: string[]) {
+  if (remotePeerIdsArray.length > 0) {
+
+    remotePeerIdsArray.forEach(async remotePeerId => {
+
+      const remoteVideoElement = document.getElementById(remotePeerId);
+
+      if (remoteVideoElement) {
+        
+        // get the streams grid element
+        const streams = document.getElementById("streams") as HTMLDivElement;
+
+        if (streams) {
+          // remove the remote video element and adjust the grid
+          streams.removeChild(remoteVideoElement);
+          adjustVideoGridLayout(streams.childElementCount, streams);
+        }
+
+        // remove the video element
+        remoteVideoElement.remove();
+      }
+    })
   }
 }
 
@@ -204,20 +265,33 @@ async function connectToNewUser(myPeer: Peer | undefined, remoteUserIds: string[
 
         const call = myPeer.call(remoteId, localStream);
 
-        const newRemoteVideo = document.createElement('video');
-        
+        let newRemoteVideoElement: HTMLVideoElement;
+
         call.on('stream', remoteUserStream => {
-          newRemoteVideo.srcObject = remoteUserStream;
-          newRemoteVideo.addEventListener('loadedmetadata', () => {
-            newRemoteVideo.play();
-          })
-          adjustVideoGridLayout(streams.childElementCount + 1, streams);
-          streams.appendChild(newRemoteVideo);
+          
+          // check to see if user already has a video element
+          const remoteVideoElement = document.getElementById(remoteId) as HTMLVideoElement;
+          if (remoteVideoElement) {
+            remoteVideoElement.srcObject = remoteUserStream;
+          }
+          // if not, create a new remote video element and add it to the grid 
+          else {
+            newRemoteVideoElement = document.createElement('video');
+            newRemoteVideoElement.id = remoteId;
+            newRemoteVideoElement.srcObject = remoteUserStream;
+            newRemoteVideoElement.addEventListener('loadedmetadata', () => {
+              newRemoteVideoElement.play();
+            })
+            // append the new remote video element to the grid
+            streams.appendChild(newRemoteVideoElement);
+            adjustVideoGridLayout(streams.childElementCount, streams);
+          }
         });
 
+        // remove the remote video element when the call is ended
         call.on('close', () => {
-          if (newRemoteVideo) {
-            newRemoteVideo.remove();
+          if (newRemoteVideoElement !== undefined && newRemoteVideoElement !== null) {
+            newRemoteVideoElement.remove();
             adjustVideoGridLayout(streams.childElementCount, streams);
           }
         });
@@ -236,15 +310,13 @@ function adjustVideoGridLayout(numberOfElem: number, streams: HTMLDivElement) {
 
     // sm adjustments
     case screenWidth <= 768: {
-      if (numberOfElem > 2)
-        _adjustStreamsGridUtility(numberOfElem, screenWidth, streams);
+      _adjustStreamsGridUtility(numberOfElem, screenWidth, streams);
       break;
     }
 
     // md adjustments
     default: {
-      if (numberOfElem > 1) 
-        _adjustStreamsGridUtility(numberOfElem, screenWidth, streams);
+      _adjustStreamsGridUtility(numberOfElem, screenWidth, streams);
       break;
     }
   }
@@ -274,7 +346,6 @@ function _adjustStreamsGridUtility(numberOfElem: number, screenWidth: number, st
     }
   }
 }
-
 
 function copyToClipboard() {
   const shareLinkElement = document.getElementById("shareLink") as HTMLInputElement;
