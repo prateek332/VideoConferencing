@@ -2,8 +2,8 @@ import { Firestore } from 'firebase/firestore'
 import { createContext, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './components/Home'
-import Room from './components/Room'
-import RoomWithoutUsername from './components/RoomWithoutUsername'
+import Room from './components/Room/Room'
+import RoomWithoutUsername from './components/Room/RoomWithoutUsername'
 import initializeFirebase from './firebase/firebaseApp'
 
 

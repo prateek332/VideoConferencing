@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AppContext } from "../App";
-import MyDialog from "./Dialog/MyDialog";
+import { AppContext } from "../../App";
+import MyDialog from "../Dialog/MyDialog";
 
 export default function RoomWithoutUsername() {
   
