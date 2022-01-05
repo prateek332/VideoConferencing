@@ -7,8 +7,10 @@ import cameraIcon from '../../assets/icons/camera.svg';
 import copyIcon from '../../assets/icons/copy.svg';
 import localStreamPosterIcon from '../../assets/icons/localStreamPoster.svg';
 import phoneHangupIcon from '../../assets/icons/phoneHangup.svg';
-import { addDisconnectCallDocument, addMyPeerDocument, removeMyPeerIdDocument } from "./firestoreManipulation";
-import { setNewConnectionsSnapshotListener, setRemoveConnectionSnapshotListener, setStopConnectionSnapshotListener } from "./snapshots";
+import { addDisconnectCallDocument, addMyPeerDocument, removeMyPeerIdDocument } from "./utilities/firestoreManipulation";
+import HangupButton from "./HangupButton/HangupButton";
+import { newConnectionsSnapshotListener, removeConnectionSnapshotListener, stopConnectionSnapshotListener } from "./utilities/snapshots";
+import VideoButton from "./VideoButton/VideoButton";
 
 
 export default function Room() {
@@ -26,7 +28,6 @@ export default function Room() {
   const [myPeer, setMyPeer] = useState<Peer>();
   const [myPeerDocId, setMyPeerDocId] = useState<string>(``);
   const [snapshotSet, setSnapshotSet] = useState(false);
-  const [stopMyStream, setStopMyStream] = useState(false);
   
   // get local video stream, set it to localStream and display it on the page
   useLayoutEffect(() => {
@@ -73,13 +74,13 @@ export default function Room() {
                   if (params.roomId !== undefined)  {
     
                     // for new peerIds
-                    setNewConnectionsSnapshotListener(db, myNewPeer, params.roomId, localStream);
+                    newConnectionsSnapshotListener(db, myNewPeer, params.roomId, localStream);
     
                     // for removing connections
-                    setRemoveConnectionSnapshotListener(db, myNewPeer, params.roomId);
+                    removeConnectionSnapshotListener(db, myNewPeer, params.roomId);
     
                     // for stopping connections
-                    setStopConnectionSnapshotListener(db, myNewPeer, params.roomId);
+                    stopConnectionSnapshotListener(db, myNewPeer, params.roomId);
                   }
   
                 } else {
@@ -120,23 +121,19 @@ export default function Room() {
         <div className="flex flex-wrap justify-center m-4">
           {/* camera, hangup */}
           <div className="w-full sm:w-56 md:w-64 flex justify-evenly items-center mb-3">
-            <div className="p-1 bg-green-500 rounded-full transition ease-in-out hover:scale-125">
+            
+            <VideoButton 
+              myPeer={myPeer} 
+              roomId={params.roomId ? params.roomId : ""} 
+              myPeerDocId={myPeerDocId}
+              setMyPeerDocId={setMyPeerDocId}
+            />
 
-              <button 
-                id="camButton"
-                onClick={() => disableMyStream(db, myPeer, params.roomId, username, myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream)}
-              >
-                <img src={cameraIcon} className="w-12 h-10" alt="camera"/>
-              </button>
-            </div>
-            <div className="p-1 bg-red-500 rounded-full transition ease-in-out hover:scale-125">
-              <button 
-                id="hangupButton"
-                onClick={() => disconnectMyCall(db, myPeer, params.roomId as string, username, navigate)}
-              >
-                <img src={phoneHangupIcon} className="w-12 h-10" alt="hangup"/>
-              </button>
-            </div>
+            <HangupButton 
+              myPeer={myPeer} 
+              roomId={params.roomId ? params.roomId : ""} 
+            />
+            
           </div>
         </div>
 
@@ -168,64 +165,9 @@ async function getLocalVideo() {
   return stream;
 }
 
-async function removeLocalVideo() {
-  const localStream = document.getElementById("localStreamRoom") as HTMLVideoElement; 
-  localStream.srcObject = null;
-  localStream.remove();
-}
-
-function disconnectMyCall(db: Firestore, myPeer: Peer | undefined, roomId: string, username: string, navigate: any) {
-  addDisconnectCallDocument(db, roomId, username, myPeer)
-    .then(res => {
-      if (res == true) {
-        removeLocalVideo();
-        navigate('/');
-      }
-      else
-        console.log('cannot disconnect, something went wrong');
-    })
-}
-
-async function disableMyStream(db, myPeer, roomId, username, myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream) {
-  
-  if (myPeer !== undefined && roomId !== undefined && myPeerDocId !== "") {
-
-    if (stopMyStream) {
-      // enable my stream
-      addMyPeerDocument(db, roomId, username, myPeer)
-        .then(docRefId => {
-          if (docRefId.length > 0) {
-            setMyPeerDocId(docRefId);
-          } else {
-            console.log("error adding myPeerId document to firestore");
-          }
-        })
-    } else {
-      // disable my stream
-      removeMyPeerIdDocument(db, roomId, myPeerDocId);
-    }
-
-    setStopMyStream(!stopMyStream);
-
-  }
-
-}
-
-
 function copyToClipboard() {
   const shareLinkElement = document.getElementById("shareLink") as HTMLInputElement;
   if (shareLinkElement) {
     navigator.clipboard.writeText(shareLinkElement.value);
   }
-}
-
-interface DisableStream {
-  db: Firestore,
-  myPeer: Peer | undefined,
-  roomId: string | undefined,
-  username: string,
-  myPeerDocId: string,
-  setMyPeerDocId: any,
-  stopMyStream: boolean,
-  setStopMyStream: any
 }

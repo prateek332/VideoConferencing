@@ -39,11 +39,15 @@ code {
   grid-auto-rows: 1fr;
   row-gap: 10px;
   column-gap: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 #streams video {
   width: 100%;
   height: 100%;
+  max-width: 500px;
+  max-height: 500px;
   object-fit: cover;
   @apply border-2 border-lime-400 rounded-xl transition ease-in-out hover:scale-125;
 }

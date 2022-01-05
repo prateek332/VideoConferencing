@@ -1,6 +1,8 @@
 import Peer from "peerjs";
 import adjustVideoGridLayout from "./adjustStreamsLayout";
 
+import remoteStreamPosterIcon from '../../assets/icons/remoteStreamPoster.svg';
+
 export default async function connectToNewUser(myPeer: Peer | undefined, remoteUserIds: string[], localStream: MediaStream) {
  
   if (myPeer) {
@@ -19,14 +21,17 @@ export default async function connectToNewUser(myPeer: Peer | undefined, remoteU
           
           // check to see if user already has a video element
           const remoteVideoElement = document.getElementById(remoteId) as HTMLVideoElement;
+
           if (remoteVideoElement) {
             remoteVideoElement.srcObject = remoteUserStream;
+            remoteVideoElement.style.objectFit = "cover";
           }
           // if not, create a new remote video element and add it to the grid 
           else {
             newRemoteVideoElement = document.createElement('video');
             newRemoteVideoElement.id = remoteId;
             newRemoteVideoElement.srcObject = remoteUserStream;
+            newRemoteVideoElement.poster = remoteStreamPosterIcon;
             newRemoteVideoElement.addEventListener('loadedmetadata', () => {
               newRemoteVideoElement.play();
             })

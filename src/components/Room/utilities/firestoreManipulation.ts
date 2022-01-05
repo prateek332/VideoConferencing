@@ -1,6 +1,6 @@
 import { addDoc, collection, deleteDoc, doc, DocumentReference, Firestore } from "firebase/firestore";
 import Peer from "peerjs";
-import appConfig from "../../app.config";
+import appConfig from "../../../app.config";
 
 async function addMyPeerDocument(db: Firestore, roomId: string, username: string,  myPeer: Peer | undefined){
 
