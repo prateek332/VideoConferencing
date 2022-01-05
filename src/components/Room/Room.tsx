@@ -1,6 +1,6 @@
-import { Firestore } from "firebase/firestore";
+import { DocumentReference, Firestore } from "firebase/firestore";
 import Peer from 'peerjs';
-import { useContext, useEffect, useLayoutEffect } from "react";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../../App";
 import cameraIcon from '../../assets/icons/camera.svg';
@@ -8,7 +8,7 @@ import copyIcon from '../../assets/icons/copy.svg';
 import localStreamPosterIcon from '../../assets/icons/localStreamPoster.svg';
 import phoneHangupIcon from '../../assets/icons/phoneHangup.svg';
 import { addDisconnectCallDocument, addMyPeerDocument } from "./firestoreManipulation";
-import { setNewConnectionsSnapshotListener, setRemoveConnectionSnapshotListener } from "./snapshots";
+import { setNewConnectionsSnapshotListener, setRemoveConnectionSnapshotListener, setStopConnectionSnapshotListener } from "./snapshots";
 
 
 export default function Room() {
@@ -22,7 +22,10 @@ export default function Room() {
   } = useContext(AppContext);
 
   const params = useParams();
+
   let myPeer: Peer | undefined;
+  const [myPeerDoc, setMyPeerDoc] = useState<DocumentReference>(undefined as DocumentReference);
+  const [snapshotSet, setSnapshotSet] = useState(false);
   
   // get local video stream, set it to localStream and display it on the page
   useLayoutEffect(() => {
@@ -38,44 +41,61 @@ export default function Room() {
         })
     }
   }, [localStream]);
+
   
   // generate peerId and write it to firestore and listen for new connections
   useEffect(() => {
     if (localStream !== null) {
       if (params.roomId === undefined || params.roomId === "" || params.roomId === null) {
-        // navigate back to home cause something is wrong
+        // navigate back to home because something is wrong
         navigate("/");
       } else {
 
-        // create a new Peer for this user
-        myPeer = new Peer();
-        
-        // when peer connected then write details to firestore and setup snapshot listeners
-        myPeer.on('open', peerId => {
+        if (!snapshotSet) {
+          
+          // create a new Peer for this user
+          myPeer = new Peer();
+          
+          // when peer connected then write details to firestore and setup snapshot listeners
+          myPeer.on('open', peerId => {
+  
+            addMyPeerDocument(db, params.roomId as string, username, myPeer)
+              .then(doc => {
+                
+                if (doc !== undefined && doc !== null) {
 
-          addMyPeerDocument(db, params.roomId as string, username, myPeer)
-            .then(doc => {
+                  // save the doc ref
+                  setMyPeerDoc(doc);
 
-              // if document was added successfully then set a snapshot listeners
-              if (doc && params.roomId !== undefined)  {
+                  console.log(doc.id);
+    
+                  // if document was added successfully then set a snapshot listeners
+                  if (doc && params.roomId !== undefined)  {
+    
+                    // setup a snapshot listener for new peerIds
+                    setNewConnectionsSnapshotListener(db, myPeer, params.roomId, localStream);
+    
+                    // setup a snapshot listener for removing connections
+                    setRemoveConnectionSnapshotListener(db, myPeer, params.roomId);
+    
+                    // setup a snapshot listener for stopping connections
+                    setStopConnectionSnapshotListener(db, myPeer, params.roomId);
+                  }
+  
+                } else {
+                  console.log("error adding myPeerId document to firestore");
+                }
+              })
+          });
+  
+          // setup call answering event listener
+          myPeer.on('call', call => {
+            call.answer(localStream);
+          })
 
-                // setup a snapshot listener for new peerIds
-                setNewConnectionsSnapshotListener(db, myPeer, params.roomId, localStream);
+          setSnapshotSet(true);
 
-                // setup a snapshot listener for removing connections
-                setRemoveConnectionSnapshotListener(db, myPeer, params.roomId);
-
-              } else {
-                console.log("error adding myPeerId document to firestore");
-              }
-            })
-        });
-
-        // setup call answering event listener
-        myPeer.on('call', call => {
-          call.answer(localStream);
-        })
-
+        }
       }
     }
 
@@ -163,6 +183,10 @@ function disconnectMyCall(db: Firestore, myPeer: Peer | undefined, roomId: strin
       else
         console.log('cannot disconnect, something went wrong');
     })
+}
+
+function disableMyStream() {
+  
 }
 
 
