@@ -1,10 +1,10 @@
-import { addDoc, collection, DocumentReference, Firestore } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, DocumentReference, Firestore } from "firebase/firestore";
 import Peer from "peerjs";
 import appConfig from "../../app.config";
 
 async function addMyPeerDocument(db: Firestore, roomId: string, username: string,  myPeer: Peer | undefined){
 
-  if (myPeer === undefined) return undefined;
+  if (myPeer === undefined) return ``;
 
   const {
     callDocument,
@@ -15,7 +15,7 @@ async function addMyPeerDocument(db: Firestore, roomId: string, username: string
     [username]: myPeer.id,
   });
 
-  return docRef;
+  return docRef.id;
 }
 
 async function addDisconnectCallDocument(db: Firestore, roomId: string, username: string, myPeer: Peer | undefined) {
@@ -33,11 +33,14 @@ async function addDisconnectCallDocument(db: Firestore, roomId: string, username
   return docRef !== undefined ? true : false;
 }
 
+async function removeMyPeerIdDocument(db: Firestore, roomId: string, docRefId: string) {
+
+  await deleteDoc(doc(db, appConfig.callDocument, roomId, appConfig.newConnections, docRefId));
+
+}
+
 export {
   addMyPeerDocument,
   addDisconnectCallDocument,
-}
-
-async function removeMyPeerId(db: Firestore, roomId: string, docRefId: string) {
-  
+  removeMyPeerIdDocument,
 }

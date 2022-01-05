@@ -1,4 +1,4 @@
-import { DocumentReference, Firestore } from "firebase/firestore";
+import { deleteDoc, DocumentReference, Firestore } from "firebase/firestore";
 import Peer from 'peerjs';
 import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,7 +7,7 @@ import cameraIcon from '../../assets/icons/camera.svg';
 import copyIcon from '../../assets/icons/copy.svg';
 import localStreamPosterIcon from '../../assets/icons/localStreamPoster.svg';
 import phoneHangupIcon from '../../assets/icons/phoneHangup.svg';
-import { addDisconnectCallDocument, addMyPeerDocument } from "./firestoreManipulation";
+import { addDisconnectCallDocument, addMyPeerDocument, removeMyPeerIdDocument } from "./firestoreManipulation";
 import { setNewConnectionsSnapshotListener, setRemoveConnectionSnapshotListener, setStopConnectionSnapshotListener } from "./snapshots";
 
 
@@ -23,9 +23,10 @@ export default function Room() {
 
   const params = useParams();
 
-  let myPeer: Peer | undefined;
-  const [myPeerDoc, setMyPeerDoc] = useState<DocumentReference>(undefined as DocumentReference);
+  const [myPeer, setMyPeer] = useState<Peer>();
+  const [myPeerDocId, setMyPeerDocId] = useState<string>(``);
   const [snapshotSet, setSnapshotSet] = useState(false);
+  const [stopMyStream, setStopMyStream] = useState(false);
   
   // get local video stream, set it to localStream and display it on the page
   useLayoutEffect(() => {
@@ -54,32 +55,31 @@ export default function Room() {
         if (!snapshotSet) {
           
           // create a new Peer for this user
-          myPeer = new Peer();
+          const myNewPeer = new Peer();
+          setMyPeer(myNewPeer);
           
           // when peer connected then write details to firestore and setup snapshot listeners
-          myPeer.on('open', peerId => {
+          myNewPeer.on('open', peerId => {
   
-            addMyPeerDocument(db, params.roomId as string, username, myPeer)
-              .then(doc => {
+            addMyPeerDocument(db, params.roomId as string, username, myNewPeer)
+              .then(docRefId => {
                 
-                if (doc !== undefined && doc !== null) {
+                if (docRefId.length > 0) {
 
                   // save the doc ref
-                  setMyPeerDoc(doc);
-
-                  console.log(doc.id);
+                  setMyPeerDocId(docRefId);
     
-                  // if document was added successfully then set a snapshot listeners
-                  if (doc && params.roomId !== undefined)  {
+                  // setup snapshot listeners
+                  if (params.roomId !== undefined)  {
     
-                    // setup a snapshot listener for new peerIds
-                    setNewConnectionsSnapshotListener(db, myPeer, params.roomId, localStream);
+                    // for new peerIds
+                    setNewConnectionsSnapshotListener(db, myNewPeer, params.roomId, localStream);
     
-                    // setup a snapshot listener for removing connections
-                    setRemoveConnectionSnapshotListener(db, myPeer, params.roomId);
+                    // for removing connections
+                    setRemoveConnectionSnapshotListener(db, myNewPeer, params.roomId);
     
-                    // setup a snapshot listener for stopping connections
-                    setStopConnectionSnapshotListener(db, myPeer, params.roomId);
+                    // for stopping connections
+                    setStopConnectionSnapshotListener(db, myNewPeer, params.roomId);
                   }
   
                 } else {
@@ -89,12 +89,12 @@ export default function Room() {
           });
   
           // setup call answering event listener
-          myPeer.on('call', call => {
+          myNewPeer.on('call', call => {
             call.answer(localStream);
           })
 
+          // no need to re-run this effect for snapshot listeners
           setSnapshotSet(true);
-
         }
       }
     }
@@ -121,9 +121,10 @@ export default function Room() {
           {/* camera, hangup */}
           <div className="w-full sm:w-56 md:w-64 flex justify-evenly items-center mb-3">
             <div className="p-1 bg-green-500 rounded-full transition ease-in-out hover:scale-125">
+
               <button 
                 id="camButton"
-                onClick={() => null}
+                onClick={() => disableMyStream(db, myPeer, params.roomId, username, myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream)}
               >
                 <img src={cameraIcon} className="w-12 h-10" alt="camera"/>
               </button>
@@ -185,8 +186,29 @@ function disconnectMyCall(db: Firestore, myPeer: Peer | undefined, roomId: strin
     })
 }
 
-function disableMyStream() {
+async function disableMyStream(db, myPeer, roomId, username, myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream) {
   
+  if (myPeer !== undefined && roomId !== undefined && myPeerDocId !== "") {
+
+    if (stopMyStream) {
+      // enable my stream
+      addMyPeerDocument(db, roomId, username, myPeer)
+        .then(docRefId => {
+          if (docRefId.length > 0) {
+            setMyPeerDocId(docRefId);
+          } else {
+            console.log("error adding myPeerId document to firestore");
+          }
+        })
+    } else {
+      // disable my stream
+      removeMyPeerIdDocument(db, roomId, myPeerDocId);
+    }
+
+    setStopMyStream(!stopMyStream);
+
+  }
+
 }
 
 
@@ -195,4 +217,15 @@ function copyToClipboard() {
   if (shareLinkElement) {
     navigator.clipboard.writeText(shareLinkElement.value);
   }
+}
+
+interface DisableStream {
+  db: Firestore,
+  myPeer: Peer | undefined,
+  roomId: string | undefined,
+  username: string,
+  myPeerDocId: string,
+  setMyPeerDocId: any,
+  stopMyStream: boolean,
+  setStopMyStream: any
 }
