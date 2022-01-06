@@ -1,8 +1,21 @@
-import { useLocation, useNavigate } from "react-router-dom"
+import { useContext, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AppContext } from "../../App";
 
 export default function Rating() {
 
+  const {
+    username,
+  } = useContext(AppContext);
+
   const navigate = useNavigate();
+
+  // uncomment after testing
+  // useEffect(() => {
+  //   if (username.length === 0) {
+  //     navigate('/');
+  //   }
+  // });
 
   let roomId = undefined;
   const { state }: any = useLocation();  
@@ -11,8 +24,18 @@ export default function Rating() {
   }
 
   return (
-    <div className="waves-background w-full h-full flex justify-center items-center">
+    <div className="waves-background w-full h-full flex flex-col flex-wrap justify-center items-center">
+      {thankyouMessage()}
       {rejoinCall(roomId || "", navigate)}
+    </div>
+  )
+}
+
+function thankyouMessage() {
+  return (
+    <div className="p-2 m-11 flex flex-wrap w-6/12 text-center text-3xl md:text-4xl font-semibold">
+      Thankyou for using my app. I hope you enjoyed the it 😊
+      <div className="w-full mt-10 border-b-2 border-opacity-40"></div>
     </div>
   )
 }
