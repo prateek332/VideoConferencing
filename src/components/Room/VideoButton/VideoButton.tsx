@@ -7,6 +7,10 @@ import { addMyPeerDocument, removeMyPeerIdDocument } from '../utilities/firestor
 import cameraIcon from '../../../assets/icons/camera.svg';
 import micIcon from '../../../assets/icons/mic.svg';
 
+const commonButtonStyle = "p-2 w-28 flex justify-between rounded-3xl transition ease-in hover:scale-110"
+const greenButtonStyle = "bg-green-500 hover:bg-green-400"
+const redButtonStyle = "bg-red-500 hover:bg-red-400"
+
 interface Props {
   myPeer: Peer | undefined;
   roomId: string,
@@ -35,12 +39,11 @@ export default function VideoButton(props: Props) {
     <div>
       <button 
         id="camButton"
-        className="p-2 w-28 flex justify-between bg-green-500 rounded-3xl transition ease-in hover:scale-110 hover:bg-green-400"
+        className={`${commonButtonStyle} ${localStream !== null ? greenButtonStyle : redButtonStyle}`}
         onClick={() =>{
           disableMyStream(db, myPeer, roomId, username,
              myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream);
           toggleLocalStream(localStream);
-          toggleCamButtonColors();
           }
         }
       >
@@ -89,24 +92,5 @@ function toggleLocalStream(localStream: MediaStream | null) {
   } else {
     localVideo.srcObject = localStream;
     localVideo.style.objectFit = "cover";
-  }
-}
-
-function toggleCamButtonColors() {
-  const camButton = document.getElementById("camButton") as HTMLButtonElement;
-  if (camButton.classList.contains("bg-green-500")) {
-    // remove green
-    camButton.classList.remove("bg-green-500");
-    camButton.classList.remove("hover:bg-green-300");
-    // add red
-    camButton.classList.add("bg-red-500");
-    camButton.classList.add("hover:bg-red-300");
-  } else {
-    // remove red
-    camButton.classList.remove("bg-red-500");
-    camButton.classList.remove("hover:bg-red-300");
-    // add green
-    camButton.classList.add("bg-green-500");  
-    camButton.classList.add("hover:bg-green-300");
   }
 }
