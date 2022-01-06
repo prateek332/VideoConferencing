@@ -8,7 +8,7 @@ import appConfig from "../app.config";
 import logoImage from '../assets/icons/logo.svg';
 
 const usernameWarningMessage = `Username is required and must be btw 5 to 20 characters`;
-const roomIdWarningMessage = `Either room id is incorrect or room doesn't exists`;
+const roomIdWarningMessage = `Either room id is incorrect or room doesn't exist`;
 
 export default function Home() {
 
@@ -58,13 +58,13 @@ export default function Home() {
   }
 
   return (
-    <div className="waves-background flex flex-col md:flex-row flex-wrap justify-center items-center h-full w-full">
+    <div className="waves-background flex flex-col md:flex-row flex-wrap md:justify-center items-center h-full w-full">
 
       {/* User greeting, username input box, room-id input box */}
       <div className="flex flex-col items-center mb-14 md:mb-0">
 
         {/* user  greeting */}
-        <div className="w-72 md:w-9/12 mb-8 text-3xl text-center">
+        <div className="w-72 md:w-9/12 mb-8 text-2xl md:text-3xl text-center">
           Hi👋🏻, enter a username to start chatting with your friends
         </div>
 
@@ -90,10 +90,8 @@ export default function Home() {
           </div>
 
           {/* username warning */}
-          <div>
-            {usernameWarning && <div className="text-red-600 text-base w-72 text-center md:w-full md:text-xl">
-              {usernameWarningMessage}
-            </div>}
+          <div className={`text-red-600 text-base w-72 text-center md:w-full md:text-xl ${usernameWarning ? '' : 'hidden'}`}>
+            {usernameWarningMessage}
           </div>
 
         </div>
@@ -104,7 +102,7 @@ export default function Home() {
 
         {/* room id input box */}
         <div className="p-2 m-2 w-72 md:w-9/12 flex flex-col items-center">
-          <div className="text-center text-3xl">
+          <div className="text-center text-2xl md:text-3xl">
             Enter room-link or room-id to join a chat room
           </div>
           <div className="flex justify-center items-center">
@@ -120,14 +118,13 @@ export default function Home() {
               className="p-1 w-20 h-10 md:w-20 md:h-10 bg-green-600 rounded-3xl font-bold text-white text-xl
               transition duration-300 ease-in-out hover:bg-green-400 hover:scale-110"
             >🚪Join</button>
+          </div>
 
             {/* roomId warning */}
-            <div>
-              {roomIdWarning && <div className="text-red-600 text-base w-72 text-center md:w-full md:text-xl">
-                {roomIdWarningMessage}
-              </div>}
+            <div className={`text-red-600 text-base w-72 text-center md:w-full md:text-xl ${roomIdWarning ? '' : 'hidden'}`}>
+              {roomIdWarningMessage}
             </div>
-          </div>
+            
         </div>
 
       </div>
@@ -137,7 +134,7 @@ export default function Home() {
         <div>
           {
             !showLocalFeed &&
-              <div className="w-56 md:w-64 mb-8">
+              <div className="w-44 lg:w-64 mb-8">
                 <img src={logoImage} alt="logo" />
               </div>
           }
@@ -148,7 +145,7 @@ export default function Home() {
             muted 
             playsInline 
             hidden
-            className="w-64 sm:w-96 md:w-full border-4 border-green-400 rounded-3xl transition-all duration-300 ease-in-out"
+            className="w-64 md:w-72 lg:w-96 xl:w-4/5 2xl:w-full border-4 border-green-400 rounded-3xl transition-all duration-300 ease-in-out"
           ></video>
 
         </div>
@@ -185,6 +182,7 @@ function _onUsernameSubmitUtility(username: string) {
 }
 
 async function _onRoomIdSubmitUtility(db: Firestore, roomId: string) {
+
   const roomIdString = roomId.split('/').reverse()[0];
 
   let docSnap;
@@ -219,7 +217,6 @@ async function onWebcamButtonClick(setShowLocalFeed: LocalFeed, setLocalStream: 
 }
 
 async function getCallDoc(db: Firestore) {
-
   // create an empty document inside "calls" collection
   const callDoc = await addDoc(collection(db, appConfig.callDocument), {});
   return callDoc;
