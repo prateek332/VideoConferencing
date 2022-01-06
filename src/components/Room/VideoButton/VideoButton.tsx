@@ -2,8 +2,10 @@ import { Firestore } from 'firebase/firestore';
 import Peer from 'peerjs';
 import { useContext, useState } from 'react';
 import { AppContext } from '../../../App';
-import cameraIcon from '../../../assets/icons/camera.svg';
 import { addMyPeerDocument, removeMyPeerIdDocument } from '../utilities/firestoreManipulation';
+
+import cameraIcon from '../../../assets/icons/camera.svg';
+import micIcon from '../../../assets/icons/mic.svg';
 
 interface Props {
   myPeer: Peer | undefined;
@@ -30,17 +32,20 @@ export default function VideoButton(props: Props) {
   } = props;
   
   return (
-    <div className="p-1 bg-green-500 rounded-full transition ease-in-out hover:scale-125">
+    <div>
       <button 
         id="camButton"
+        className="p-2 w-28 flex justify-between bg-green-500 rounded-3xl transition ease-in hover:scale-110 hover:bg-green-400"
         onClick={() =>{
           disableMyStream(db, myPeer, roomId, username,
              myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream);
           toggleLocalStream(localStream);
+          toggleCamButtonColors();
           }
         }
       >
-        <img src={cameraIcon} className="w-12 h-10" alt="camera"/>
+        <img src={micIcon} className="w-10 h-10" alt="camera"/>
+        <img src={cameraIcon} className="w-10 h-10" alt="camera"/>
       </button>
     </div>
   )
@@ -84,5 +89,24 @@ function toggleLocalStream(localStream: MediaStream | null) {
   } else {
     localVideo.srcObject = localStream;
     localVideo.style.objectFit = "cover";
+  }
+}
+
+function toggleCamButtonColors() {
+  const camButton = document.getElementById("camButton") as HTMLButtonElement;
+  if (camButton.classList.contains("bg-green-500")) {
+    // remove green
+    camButton.classList.remove("bg-green-500");
+    camButton.classList.remove("hover:bg-green-300");
+    // add red
+    camButton.classList.add("bg-red-500");
+    camButton.classList.add("hover:bg-red-300");
+  } else {
+    // remove red
+    camButton.classList.remove("bg-red-500");
+    camButton.classList.remove("hover:bg-red-300");
+    // add green
+    camButton.classList.add("bg-green-500");  
+    camButton.classList.add("hover:bg-green-300");
   }
 }

@@ -30,19 +30,19 @@ export default function Room() {
   const [snapshotSet, setSnapshotSet] = useState(false);
   
   // get local video stream, set it to localStream and display it on the page
-  useLayoutEffect(() => {
+  // useLayoutEffect(() => {
     
-    if (localStream !== null) {
-      const myVideo = document.getElementById("localStreamRoom") as HTMLVideoElement;
-      myVideo.srcObject = localStream;
-      myVideo.muted = true;
-    } else {
-      getLocalVideo()
-        .then(stream => {
-          setLocalStream(stream);
-        })
-    }
-  }, [localStream]);
+  //   if (localStream !== null) {
+  //     const myVideo = document.getElementById("localStreamRoom") as HTMLVideoElement;
+  //     myVideo.srcObject = localStream;
+  //     myVideo.muted = true;
+  //   } else {
+  //     getLocalVideo()
+  //       .then(stream => {
+  //         setLocalStream(stream);
+  //       })
+  //   }
+  // }, [localStream]);
 
   
   // generate peerId and write it to firestore and listen for new connections
