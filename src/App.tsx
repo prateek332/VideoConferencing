@@ -2,6 +2,7 @@ import { Firestore } from 'firebase/firestore'
 import { createContext, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './components/Home'
+import Rating from './components/Rating/Rating'
 import Room from './components/Room/Room'
 import RoomWithoutUsername from './components/Room/RoomWithoutUsername'
 import initializeFirebase from './firebase/firebaseApp'
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/:roomId" element={<RoomWithoutUsername />} />
             }
           </Route>
+          <Route path="/rating" element={<Rating />} />
         </Routes>
       </div>
     </AppContext.Provider>

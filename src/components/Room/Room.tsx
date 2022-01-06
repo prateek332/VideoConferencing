@@ -1,14 +1,11 @@
-import { deleteDoc, DocumentReference, Firestore } from "firebase/firestore";
 import Peer from 'peerjs';
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../../App";
-import cameraIcon from '../../assets/icons/camera.svg';
 import copyIcon from '../../assets/icons/copy.svg';
 import localStreamPosterIcon from '../../assets/icons/localStreamPoster.svg';
-import phoneHangupIcon from '../../assets/icons/phoneHangup.svg';
-import { addDisconnectCallDocument, addMyPeerDocument, removeMyPeerIdDocument } from "./utilities/firestoreManipulation";
 import HangupButton from "./HangupButton/HangupButton";
+import { addMyPeerDocument } from "./utilities/firestoreManipulation";
 import { newConnectionsSnapshotListener, removeConnectionSnapshotListener, stopConnectionSnapshotListener } from "./utilities/snapshots";
 import VideoButton from "./VideoButton/VideoButton";
 
@@ -19,8 +16,8 @@ export default function Room() {
 
   const {
     db,
-    localStream, setLocalStream,
-    username
+    localStream,
+    username,
   } = useContext(AppContext);
 
   const params = useParams();

@@ -27,10 +27,16 @@ export default function HangupButton(props: Props) {
   } = props;
 
   return (
-    <div className="p-1 bg-red-500 rounded-full transition ease-in-out hover:scale-125">
+    <div>
       <button 
         id="hangupButton"
-        onClick={() => disconnectMyCall(db, myPeer, roomId, username, navigate)}
+        className="p-1 h-14 bg-red-500 rounded-full transition ease-in hover:scale-110 hover:bg-red-400"
+        onClick={() => {
+            disconnectMyCall(db, myPeer, roomId, username, navigate)
+            // remove after testing
+            navigate('/rating', { state: { roomId: roomId} });
+          }
+        }
       >
         <img src={phoneHangupIcon} className="w-12 h-10" alt="hangup"/>
       </button>
@@ -43,7 +49,7 @@ function disconnectMyCall(db: Firestore, myPeer: Peer | undefined, roomId: strin
     .then(res => {
       if (res == true) {
         removeLocalVideo();
-        navigate('/');
+        navigate('/rating');
       }
       else
         console.log('cannot disconnect, something went wrong');

@@ -41,7 +41,7 @@ export default function RoomWithoutUsername() {
   }
 
   return (
-    <div className="waves-background flex h-full">
+    <div className="waves-background flex h-full w-full">
       <MyDialog
         isOpen={isOpen}
         outsideClickClose={false}

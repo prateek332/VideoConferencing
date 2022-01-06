@@ -23,7 +23,7 @@ export default function Home() {
   const {
     db,
     username, setUsername,
-    localStream, setLocalStream,
+    setLocalStream,
   } = useContext(AppContext);
 
   // checking if username is saved in local storage
