@@ -34,23 +34,28 @@ code {
 }
 
 #streams {
+  margin-top: 20px;
   grid-row: 1/ span 5;
   display: grid;
   grid-template-columns: repeat(1, 1fr); /* dynamically change this property when new users are added */
   grid-auto-rows: 1fr;
-  row-gap: 10px;
+  row-gap: 5px;
   column-gap: 10px;
-  justify-content: center;
+  justify-items: center;
   align-items: center;
+  max-height: 76vh;
 }
 
 #streams video {
-  width: 100%;
-  height: 100%;
-  max-width: 500px;
-  max-height: 500px;
+  @apply w-full h-4/5 sm:w-full sm:h-full;
+  max-width: 30rem;
+  max-height: 35rem;
   object-fit: cover;
-  @apply border-2 border-lime-400 rounded-xl transition ease-in-out hover:scale-125;
+  @apply border-2 bg-red-400 border-lime-400 rounded-xl transition ease-in-out hover:scale-125;
+}
+
+#streams #localStreamRoom {
+  @apply bg-amber-300;
 }
 
 .waves-background {

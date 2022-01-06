@@ -61,7 +61,7 @@ export default function Home() {
     <div className="waves-background flex flex-col md:flex-row flex-wrap md:justify-center items-center h-full w-full">
 
       {/* User greeting, username input box, room-id input box */}
-      <div className="flex flex-col items-center mb-14 md:mb-0">
+      <div className="flex flex-col items-center mt-10 md:mt-0 mb-14 md:mb-0">
 
         {/* user  greeting */}
         <div className="w-72 md:w-9/12 mb-8 text-2xl md:text-3xl text-center">

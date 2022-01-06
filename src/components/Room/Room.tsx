@@ -1,5 +1,5 @@
 import Peer from 'peerjs';
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../../App";
 import copyIcon from '../../assets/icons/copy.svg';
@@ -16,7 +16,7 @@ export default function Room() {
 
   const {
     db,
-    localStream,
+    localStream, setLocalStream,
     username,
   } = useContext(AppContext);
 
@@ -100,11 +100,12 @@ export default function Room() {
   }, [localStream]);
 
   return (
-    <div className="waves-background grid grid-cols-1 grid-rows-6 w-full h-full justify-items-center">
+    <div className="waves-background grid grid-cols-1 grid-rows-6 w-screen h-screen justify-items-center">
 
        {/* streams */}
       <div
         id="streams"
+        className="justify-items-center border-2"
       >
         <video
           id="localStreamRoom" autoPlay playsInline poster={localStreamPosterIcon}
@@ -115,27 +116,24 @@ export default function Room() {
       <div className="flex flex-wrap justify-center items-center">
 
         {/* controls => cam_button, hangup_button */}
-        <div className="flex flex-wrap justify-center m-4">
-          {/* camera, hangup */}
-          <div className="w-full sm:w-56 md:w-64 flex justify-evenly items-center mb-3">
-            
-            <VideoButton 
-              myPeer={myPeer} 
-              roomId={params.roomId ? params.roomId : ""} 
-              myPeerDocId={myPeerDocId}
-              setMyPeerDocId={setMyPeerDocId}
-            />
+        <div className="p-2 flex w-56 sm:mr-12 mb-2 justify-between items-center border-2">
 
-            <HangupButton 
-              myPeer={myPeer} 
-              roomId={params.roomId ? params.roomId : ""} 
-            />
-            
-          </div>
+          <VideoButton 
+            myPeer={myPeer} 
+            roomId={params.roomId ? params.roomId : ""} 
+            myPeerDocId={myPeerDocId}
+            setMyPeerDocId={setMyPeerDocId}
+          />
+
+          <HangupButton 
+            myPeer={myPeer} 
+            roomId={params.roomId ? params.roomId : ""} 
+          />
+          
         </div>
 
         {/* room share link */}
-        <div className="flex p-2 text-xl bg-slate-100 text-blue-800 rounded-2xl">
+        <div className="flex p-2 h-12 text-xl bg-slate-100 text-blue-800 rounded-2xl">
           <input 
             id="shareLink" type="text" readOnly
             value={`${window.location.origin}/${params.roomId}`}
