@@ -2,11 +2,16 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../../App";
 import MyDialog from "../Dialog/MyDialog";
+import { _onRoomIdSubmitUtility } from "../Home";
 
 export default function RoomWithoutUsername() {
+
+  const [roomExists, setRoomExists] = useState(false);
+  const [roomExistsMessage, setRoomExistsMessage] = useState("Checking if room exists...");
   
   const {
-    username, setUsername,
+    setUsername,
+    db,
   } = useContext(AppContext);
 
   // grab reference call document from url
@@ -18,7 +23,25 @@ export default function RoomWithoutUsername() {
   
   // states for showing dialog
   const [isOpen, setIsOpen] = useState(true);
-  const [description, setDescription] = useState(""); 
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    try {
+      _onRoomIdSubmitUtility(db, urlParams.roomId || "")
+        .then(roomId => {
+          roomId ? 
+          setRoomExists(true) :
+          roomNotExists(setRoomExistsMessage, navigate);
+        })
+    } catch (e) {
+      console.log(e);
+      roomNotExists(setRoomExistsMessage, navigate);
+    }
+
+    return(() => {
+      clearTimeout();
+    })
+  }, []);
 
 
   const onUsernameSubmit = () => {
@@ -27,13 +50,12 @@ export default function RoomWithoutUsername() {
       setDescription("Username must be between 5 and 20 characters");
     } else {
       if (urlParams.roomId) {
-        // create a document reference and set it to callDocRef
+        // set username and save it in local storage
         setUsername(usernameInput);
+        localStorage.setItem("username", usernameInput);
         // close the dialog and navigate to chat page
         setIsOpen(false);
         navigate(`/${urlParams.roomId}`);
-        // navigate(`/`);
-
       } else {
         setDescription("Something went wrong. Please try again.");
       }
@@ -42,19 +64,26 @@ export default function RoomWithoutUsername() {
 
   return (
     <div className="waves-background flex h-full w-full">
-      <MyDialog
-        isOpen={isOpen}
-        outsideClickClose={false}
-        title="Enter Username"
-        description={description}
-        children={inputUsername(usernameInput, setUsernameInput)}
-        submitButton
-        submitButtonMessage="Submit"
-        submitButtonFunc={onUsernameSubmit}
-        cancelButton={undefined}
-        cancelButtonMessage={undefined}
-        cancelButtonFunc={() => null}
-      />
+      {
+        roomExists ?
+            <MyDialog
+              isOpen={isOpen}
+              outsideClickClose={false}
+              title="Enter Username"
+              description={description}
+              children={inputUsername(usernameInput, setUsernameInput)}
+              submitButton
+              submitButtonMessage="Submit"
+              submitButtonFunc={onUsernameSubmit}
+            />
+          :
+            <MyDialog
+            isOpen={isOpen}
+            outsideClickClose={false}
+            title={roomExistsMessage}
+            submitButtonFunc={() => null}
+          />
+      }
   </div>
   )
 }
@@ -79,4 +108,11 @@ function inputUsername(usernameInput: string, setUsernameInput: (username: strin
 function getUsername(): string {
   const username = localStorage.getItem('username');
   return username ? username : '';
+}
+
+function roomNotExists(setRoomExistsMessage: any, navigate: any) {
+  setRoomExistsMessage("Room does not exist, navigating back to homepage in 5 secs...");
+  setTimeout(() => {
+    navigate("/");
+  }, 5000);
 }

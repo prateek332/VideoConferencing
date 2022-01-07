@@ -1,6 +1,6 @@
 import { FirebaseApp } from "firebase/app";
 import { addDoc, collection, doc, Firestore, getDoc, updateDoc } from "firebase/firestore";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
 import appConfig from "../app.config";
@@ -31,7 +31,6 @@ export default function Home() {
     setUsername(getUsername());
   },[]);
 
-
   const onUsernameSubmit = () => {
     if (_onUsernameSubmitUtility(username)) {
       getCallDoc(db)
@@ -42,11 +41,11 @@ export default function Home() {
   }
 
   const onRoomIdSubmit = () => {
-    const roomId = roomIdRef.current?.value;
-    if (roomId !== undefined) {
-      _onRoomIdSubmitUtility(db, roomId)
-        .then(roomExists => {
-          if (roomExists){
+    const roomIdElemValue = roomIdRef.current?.value;
+    if (roomIdElemValue !== undefined) {
+      _onRoomIdSubmitUtility(db, roomIdElemValue)
+        .then(roomId => {
+          if (roomId){
             navigate(`/${roomId}`);
           } else {
             setRoomIdWarning(true);
@@ -143,7 +142,7 @@ export default function Home() {
             id="localStreamHome" 
             autoPlay 
             muted 
-            playsInline 
+            playsInline
             hidden
             className="w-64 md:w-72 lg:w-96 xl:w-4/5 2xl:w-full border-4 border-green-400 rounded-3xl transition-all duration-300 ease-in-out"
           ></video>
@@ -189,13 +188,13 @@ async function _onRoomIdSubmitUtility(db: Firestore, roomId: string) {
   try {
     docSnap = await getDoc(doc(db, appConfig.callDocument, roomIdString));
   } catch (_) {
-    return false;
+    return null;
   }
   
   if (docSnap.exists()) {
-    return true;
+    return roomIdString;
   } else {
-    return false;
+    return null;
   }
 }
 
@@ -224,4 +223,8 @@ async function getCallDoc(db: Firestore) {
 
 type LocalFeed = (showLocalFeed: boolean) => void;
 type LocalStream = (showLocalFeed: MediaStream | null) => void;
+
+export {
+  _onRoomIdSubmitUtility
+}
 

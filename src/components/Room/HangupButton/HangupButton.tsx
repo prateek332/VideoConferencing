@@ -1,15 +1,16 @@
 import { Firestore } from "firebase/firestore";
 import Peer from "peerjs";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../../../App";
 import phoneHangupIcon from "../../../assets/icons/phoneHangup.svg";
-import { addDisconnectCallDocument } from "../utilities/firestoreManipulation";
+import { addDisconnectCallDocument, removeMyPeerIdDocument } from "../utilities/firestoreManipulation";
 
 import MyDialog from '../../Dialog/MyDialog';
 
 interface Props {
   myPeer: Peer | undefined;
+  myPeerDocId: string;
   roomId: string;
 }
 
@@ -28,7 +29,19 @@ export default function HangupButton(props: Props) {
   const {
     myPeer,
     roomId,
+    myPeerDocId,
   } = props;
+
+  // useEffect(() => {
+  //   // alert user if they are about to leave the room
+  //   window.addEventListener('beforeunload', alertUser);
+  //   // handle tab closing
+  //   window.addEventListener('unload', handleTabClosing(null, db, myPeer, roomId, username));
+
+  //   return () => {
+  //     window.removeEventListener('beforeunload', alertUser);
+  //   }
+  // }, []);
 
   return (
     <div>
@@ -41,13 +54,13 @@ export default function HangupButton(props: Props) {
       </button>
       <MyDialog
         isOpen={isOpen}
-        outsideClickClose={true}
+        outsideClickClose={false}
         title="Disconnect call?"
         description={undefined}
         children={undefined}
         submitButton
         submitButtonMessage="Yes"
-        submitButtonFunc={() => dialogSubmitButtonFunc(db, myPeer, username, roomId, setIsOpen, navigate)}
+        submitButtonFunc={() => dialogSubmitButtonFunc(db, myPeer, myPeerDocId, username, roomId, setIsOpen, navigate)}
         cancelButton
         cancelButtonMessage="No"
         cancelButtonFunc={() => setIsOpen(false)}
@@ -59,19 +72,25 @@ export default function HangupButton(props: Props) {
 async function dialogSubmitButtonFunc(
   db: Firestore, 
   myPeer: Peer | undefined,
+  myPeerDocId: string,
   username: string,
   roomId: string,
   setIsOpen: any, 
   navigate: any
   ) {
 
-  await disconnectMyCall(db, myPeer, roomId, username);
-  navigate('/rating', { state: { roomId: roomId} });
+  await disconnectMyCall(db, myPeer, myPeerDocId, roomId, username);
   setIsOpen(false);
-
+  navigate('/rating', { state: { roomId: roomId} });
 }
 
-async function disconnectMyCall(db: Firestore, myPeer: Peer | undefined, roomId: string, username: string) {
+async function disconnectMyCall(
+  db: Firestore, 
+  myPeer: Peer | undefined,
+  myPeerDocId: string, 
+  roomId: string, 
+  username: string
+  ) {
   addDisconnectCallDocument(db, roomId, username, myPeer)
     .then(res => {
       if (res == true) {
@@ -80,10 +99,23 @@ async function disconnectMyCall(db: Firestore, myPeer: Peer | undefined, roomId:
       else
         console.log('cannot disconnect, something went wrong');
     })
+  
+  removeMyPeerIdDocument(db, roomId, myPeerDocId);
 }
 
 async function removeLocalVideo() {
   const localStream = document.getElementById("localStreamRoom") as HTMLVideoElement; 
-  localStream.srcObject = null;
-  localStream.remove();
+  if (localStream) {
+    localStream.srcObject = null;
+    localStream.remove();
+  }
 }
+
+const alertUser = (event: any) => {
+  event.preventDefault();
+  event.returnValue="";
+}
+
+// const handleTabClosing = (event: any, db: any, myPeer: any, roomId: any, username: any) => {
+//   disconnectMyCall(db, myPeer, roomId, username);
+// }

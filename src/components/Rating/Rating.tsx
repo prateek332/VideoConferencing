@@ -10,12 +10,11 @@ export default function Rating() {
 
   const navigate = useNavigate();
 
-  // uncomment after testing
-  // useEffect(() => {
-  //   if (username.length === 0) {
-  //     navigate('/');
-  //   }
-  // });
+  useEffect(() => {
+    if (username.length === 0) {
+      navigate('/');
+    }
+  });
 
   let roomId = undefined;
   const { state }: any = useLocation();  

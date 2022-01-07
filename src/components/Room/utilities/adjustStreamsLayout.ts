@@ -39,8 +39,6 @@ function _adjustStreamsGridUtility(numberOfElem: number, screenWidth: number, st
     }
   }
 
-  console.log(col);
-
   switch(true) {
     case screenWidth <= 768: {
       if (col > 3) col = 3; // 3 cols max for smaller screens

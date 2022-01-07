@@ -4,15 +4,15 @@ import { useState, Fragment } from "react";
 interface DialogProps {
   isOpen: boolean;
   outsideClickClose: boolean;
-  title: string;
-  description: string | undefined;
-  children: any | undefined;
-  submitButton: boolean;
-  submitButtonMessage: string;
+  title?: string;
+  description?: string | undefined;
+  children?: any | undefined;
+  submitButton?: boolean;
+  submitButtonMessage?: string;
   submitButtonFunc: () => void;
-  cancelButton: boolean | undefined;
-  cancelButtonMessage: string | undefined;
-  cancelButtonFunc: () => void;
+  cancelButton?: boolean | undefined;
+  cancelButtonMessage?: string | undefined;
+  cancelButtonFunc?: () => void;
 }
 
 export default function MyDialog(props: DialogProps) {
@@ -61,7 +61,7 @@ export default function MyDialog(props: DialogProps) {
             >
               <div className="p-4 relative bg-white rounded-xl max-w-sm mx-auto">
                 <Dialog.Title className="text-4xl font-semibold mb-5">
-                  {title || "Default modal title"}
+                  {title || null}
                 </Dialog.Title>
 
                 {children ? children : null}

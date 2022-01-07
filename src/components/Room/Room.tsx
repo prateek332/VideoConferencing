@@ -2,9 +2,9 @@ import Peer from 'peerjs';
 import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../../App";
-import copyIcon from '../../assets/icons/copy.svg';
 import localStreamPosterIcon from '../../assets/icons/localStreamPoster.svg';
 import HangupButton from "./HangupButton/HangupButton";
+import RoomLinkButton from './RoomLinkButton/RoomLinkButton';
 import { addMyPeerDocument } from "./utilities/firestoreManipulation";
 import { newConnectionsSnapshotListener, removeConnectionSnapshotListener, stopConnectionSnapshotListener } from "./utilities/snapshots";
 import VideoButton from "./VideoButton/VideoButton";
@@ -27,23 +27,26 @@ export default function Room() {
   const [snapshotSet, setSnapshotSet] = useState(false);
   
   // get local video stream, set it to localStream and display it on the page
-  // useLayoutEffect(() => {
+  useLayoutEffect(() => {
     
-  //   if (localStream !== null) {
-  //     const myVideo = document.getElementById("localStreamRoom") as HTMLVideoElement;
-  //     myVideo.srcObject = localStream;
-  //     myVideo.muted = true;
-  //   } else {
-  //     getLocalVideo()
-  //       .then(stream => {
-  //         setLocalStream(stream);
-  //       })
-  //   }
-  // }, [localStream]);
+    if (localStream !== null) {
+      const myVideo = document.getElementById("localStreamRoom") as HTMLVideoElement;
+      myVideo.srcObject = localStream;
+      myVideo.muted = true;
+    } else {
+      getLocalVideo()
+        .then(stream => {
+          setLocalStream(stream);
+        })
+    }
+  }, [localStream]);
 
   
   // generate peerId and write it to firestore and listen for new connections
   useEffect(() => {
+
+    let newConnUnsubscribe: any, removeConnUnsubscribe: any, stopConnUnsubscribe: any;
+
     if (localStream !== null) {
       if (params.roomId === undefined || params.roomId === "" || params.roomId === null) {
         // navigate back to home because something is wrong
@@ -71,13 +74,13 @@ export default function Room() {
                   if (params.roomId !== undefined)  {
     
                     // for new peerIds
-                    newConnectionsSnapshotListener(db, myNewPeer, params.roomId, localStream);
+                    newConnUnsubscribe = newConnectionsSnapshotListener(db, myNewPeer, params.roomId, localStream);
     
                     // for removing connections
-                    removeConnectionSnapshotListener(db, myNewPeer, params.roomId);
+                    removeConnUnsubscribe = removeConnectionSnapshotListener(db, myNewPeer, params.roomId);
     
                     // for stopping connections
-                    stopConnectionSnapshotListener(db, myNewPeer, params.roomId);
+                    stopConnUnsubscribe = stopConnectionSnapshotListener(db, myNewPeer, params.roomId);
                   }
   
                 } else {
@@ -95,8 +98,13 @@ export default function Room() {
           setSnapshotSet(true);
         }
       }
-    }
 
+      return(() => {
+        stopConnUnsubscribe();
+        removeConnUnsubscribe();
+        newConnUnsubscribe();
+      })
+    }
   }, [localStream]);
 
   return (
@@ -126,28 +134,15 @@ export default function Room() {
           />
 
           <HangupButton 
-            myPeer={myPeer} 
+            myPeer={myPeer}
+            myPeerDocId={myPeerDocId}
             roomId={params.roomId ? params.roomId : ""} 
           />
           
         </div>
 
         {/* room share link */}
-        <div className="flex p-2 h-12 text-xl bg-slate-100 text-blue-800 rounded-2xl">
-          <input 
-            id="shareLink" type="text" readOnly
-            value={`${window.location.origin}/${params.roomId}`}
-            className="bg-transparent"
-          />
-
-          <button onClick={_ => copyToClipboard()} className="p-1">
-            <img
-              src={copyIcon}
-              className="w-full h-full bg-slate-200 transition ease-in hover:scale-125"
-              alt="copy"
-            />
-          </button>
-        </div>
+        <RoomLinkButton />
 
       </div>
 
@@ -158,11 +153,4 @@ export default function Room() {
 async function getLocalVideo() {
   const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true});
   return stream;
-}
-
-function copyToClipboard() {
-  const shareLinkElement = document.getElementById("shareLink") as HTMLInputElement;
-  if (shareLinkElement) {
-    navigator.clipboard.writeText(shareLinkElement.value);
-  }
 }

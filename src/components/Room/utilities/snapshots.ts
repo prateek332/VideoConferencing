@@ -6,12 +6,13 @@ import disableVideoStream from "./disableVideoStream";
 import removeConnection from "./removeConnection";
 
 function newConnectionsSnapshotListener(db: Firestore, myPeer: Peer | undefined, roomId: string, localStream: MediaStream) {
+  let unsubscribe;
   if (myPeer) {
     const q = query(collection(db, appConfig.callDocument, roomId, appConfig.newConnections));
-    const unsubscribe = onSnapshot(q, async snapshot => {
+    unsubscribe = onSnapshot(q, async snapshot => {
       snapshot.docChanges().forEach(async change => {
         if (change.type === 'added') {
-          const remotePeerIdsArray = Object.values(change.doc.data());
+          const remotePeerIdsArray = Object.values(change.doc.data()).filter(remotePeerId => remotePeerId !== myPeer.id);
           connectToNewUser(myPeer, remotePeerIdsArray, localStream);
         }
       })
@@ -19,15 +20,17 @@ function newConnectionsSnapshotListener(db: Firestore, myPeer: Peer | undefined,
   } else {
     console.log('myPeer is undefined');
   }
+  return unsubscribe;
 }
 
 function removeConnectionSnapshotListener(db: Firestore, myPeer:Peer | undefined, roomId: string) {
+  let unsubscribe;
   if (myPeer) {
     const q = query(collection(db, appConfig.callDocument, roomId, appConfig.removeConnections));
-    const unsubscribe = onSnapshot(q, async snapshot => {
+    unsubscribe = onSnapshot(q, async snapshot => {
       snapshot.docChanges().forEach(async change => {
         if (change.type === 'added') {
-          const remotePeerIdsArray = Object.values(change.doc.data());
+          const remotePeerIdsArray = Object.values(change.doc.data()).filter(remotePeerId => remotePeerId !== myPeer.id);
           removeConnection(remotePeerIdsArray);
         }
       })
@@ -35,20 +38,23 @@ function removeConnectionSnapshotListener(db: Firestore, myPeer:Peer | undefined
   } else {
     console.log('myPeer is undefined. cannot remove connection');
   }
+  return unsubscribe;
 }
 
 function stopConnectionSnapshotListener(db: Firestore, myPeer: Peer | undefined, roomId: string) {
+  let unsubscribe;
   if (myPeer) {
     const q = query(collection(db, appConfig.callDocument, roomId, appConfig.newConnections));
-    const unsubscribe = onSnapshot(q, async snapshot => {
+    unsubscribe = onSnapshot(q, async snapshot => {
       snapshot.docChanges().forEach(async change => {
         if (change.type == 'removed') {
-          const remotePeerIdsArray = Object.values(change.doc.data());
+          const remotePeerIdsArray = Object.values(change.doc.data()).filter(remotePeerId => remotePeerId !== myPeer.id);
           disableVideoStream(remotePeerIdsArray);
         }
       })
     })
   }
+  return unsubscribe;
 }
 
 export {

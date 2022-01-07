@@ -27,6 +27,7 @@ export default function VideoButton(props: Props) {
   } = useContext(AppContext);
 
   const [stopMyStream, setStopMyStream] = useState(false);
+  const [toggleButtonStyle, setToggleButtonStyle] = useState(true);
 
   const {
     myPeer,
@@ -39,11 +40,12 @@ export default function VideoButton(props: Props) {
     <div>
       <button 
         id="camButton"
-        className={`${commonButtonStyle} ${localStream !== null ? greenButtonStyle : redButtonStyle}`}
+        className={`${commonButtonStyle} ${toggleButtonStyle ? greenButtonStyle : redButtonStyle}`}
         onClick={() =>{
-          disableMyStream(db, myPeer, roomId, username,
-             myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream);
-          toggleLocalStream(localStream);
+            disableMyStream(db, myPeer, roomId, username,
+              myPeerDocId, setMyPeerDocId, stopMyStream, setStopMyStream);
+            toggleLocalStream(localStream);
+            setToggleButtonStyle(!toggleButtonStyle);
           }
         }
       >
