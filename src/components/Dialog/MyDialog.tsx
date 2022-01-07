@@ -3,34 +3,40 @@ import { useState, Fragment } from "react";
 
 interface DialogProps {
   isOpen: boolean;
-  closeDialog: () => void;
   outsideClickClose: boolean;
   title: string;
-  description: string;
+  description: string | undefined;
+  children: any | undefined;
   submitButton: boolean;
-  buttonMessage: string;
-  children: any;
+  submitButtonMessage: string;
+  submitButtonFunc: () => void;
+  cancelButton: boolean | undefined;
+  cancelButtonMessage: string | undefined;
+  cancelButtonFunc: () => void;
 }
 
 export default function MyDialog(props: DialogProps) {
 
   const {
     isOpen,
-    closeDialog,
     outsideClickClose,
     title,
     description,
     children,
-    buttonMessage,
     submitButton,
+    submitButtonMessage,
+    submitButtonFunc,
+    cancelButton,
+    cancelButtonMessage,
+    cancelButtonFunc,
   } = props;
 
   return (
     <>
       <Transition show={isOpen}>
         <Dialog 
-          open={isOpen} 
-          onClose={() => outsideClickClose ? closeDialog() : null}
+          open={isOpen}
+          onClose={() => outsideClickClose ? submitButtonFunc() : null}
           className="fixed flex items-center justify-center z-10 inset-0 overflow-y-auto"
         >
           <div className="flex items-center justify-center">
@@ -59,17 +65,30 @@ export default function MyDialog(props: DialogProps) {
                 </Dialog.Title>
 
                 {children ? children : null}
+
                 <Dialog.Description className="ml-2 text-red-500 font-light mb-5">
                   {description ? description : null}
                 </Dialog.Description>
 
+              <div className="flex w-44 justify-between">
+
                 {
                   submitButton && 
                     <button 
-                      onClick={closeDialog}
-                      className="p-2 font-semibold rounded-2xl bg-green-400 transition hover:scale-110 hover:bg-green-300" 
-                    >{buttonMessage || "Default button message"}</button>
+                    onClick={submitButtonFunc}
+                    className="p-2 w-20 font-semibold rounded-2xl bg-green-400 transition hover:scale-110 hover:bg-green-300" 
+                    >{submitButtonMessage || "Default button message"}</button>
                 }
+
+                {
+                  cancelButton &&
+                    <button
+                    onClick={cancelButtonFunc}
+                    className="p-2 w-20 font-semibold rounded-2xl bg-red-400 transition hover:scale-110 hover:bg-red-300"
+                    >{cancelButtonMessage || "Default button message"}</button>
+                }
+              </div>
+
               </div>
             
             </Transition.Child>

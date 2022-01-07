@@ -105,7 +105,7 @@ export default function Room() {
        {/* streams */}
       <div
         id="streams"
-        className="justify-items-center border-2"
+        className="justify-items-center"
       >
         <video
           id="localStreamRoom" autoPlay playsInline poster={localStreamPosterIcon}
@@ -116,7 +116,7 @@ export default function Room() {
       <div className="flex flex-wrap justify-center items-center">
 
         {/* controls => cam_button, hangup_button */}
-        <div className="p-2 flex w-56 sm:mr-12 mb-2 justify-between items-center border-2">
+        <div className="p-2 flex w-56 sm:mr-12 mb-2 justify-between items-center">
 
           <VideoButton 
             myPeer={myPeer} 

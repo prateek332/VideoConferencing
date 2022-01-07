@@ -45,12 +45,15 @@ export default function RoomWithoutUsername() {
       <MyDialog
         isOpen={isOpen}
         outsideClickClose={false}
-        closeDialog={onUsernameSubmit}
         title="Enter Username"
         description={description}
         children={inputUsername(usernameInput, setUsernameInput)}
         submitButton
-        buttonMessage="Submit"
+        submitButtonMessage="Submit"
+        submitButtonFunc={onUsernameSubmit}
+        cancelButton={undefined}
+        cancelButtonMessage={undefined}
+        cancelButtonFunc={() => null}
       />
   </div>
   )
