@@ -29,6 +29,7 @@ export default async function connectToNewUser(myPeer: Peer | undefined, remoteU
           if (remoteDivElement) {
             const remoteVideoElement = remoteDivElement.firstChild as HTMLVideoElement;
             remoteVideoElement.srcObject = remoteUserStream;
+            remoteVideoElement.style.objectFit = 'cover';
           }
           // if not, create a new remote video element and add it to the grid
           else {
