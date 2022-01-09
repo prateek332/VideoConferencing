@@ -19,7 +19,12 @@ export default function RoomLinkButton() {
       <input 
         id="shareLink" type="text" readOnly
         value={`${window.location.origin}/${params.roomId}`}
-        className="bg-transparent"
+        className="bg-transparent cursor-pointer"
+        onClick={() => {
+          setIsOpen(true);
+          copyToClipboard(); 
+          setTimeout(() => setIsOpen(false), 700);
+        }}
       />
 
       <button onClick={() => { 

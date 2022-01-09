@@ -1,12 +1,12 @@
 import { Firestore } from "firebase/firestore";
 import Peer from "peerjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../../../App";
 import phoneHangupIcon from "../../../assets/icons/phoneHangup.svg";
+import MyDialog from '../../Dialog/MyDialog';
 import { addDisconnectCallDocument, removeMyPeerIdDocument } from "../utilities/firestoreManipulation";
 
-import MyDialog from '../../Dialog/MyDialog';
 
 interface Props {
   myPeer: Peer | undefined;

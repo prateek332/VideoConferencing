@@ -1,11 +1,13 @@
 const firebaseConfig = {
-	apiKey: "AIzaSyA_h8hLD8dKmeR4Y3GuqO_POCiINEa0Nkc",
-	authDomain: "resumeprojectsprateek.firebaseapp.com",
-	projectId: "resumeprojectsprateek",
-	storageBucket: "resumeprojectsprateek.appspot.com",
-	messagingSenderId: "658186952127",
-	appId: "1:658186952127:web:4600361e39e947886b550a"
-}
+  apiKey: "AIzaSyB-WWRWmwpneXpPNTKIXDsJj8CXmWquW8I",
+  authDomain: "prateekvideochat.firebaseapp.com",
+  projectId: "prateekvideochat",
+  storageBucket: "prateekvideochat.appspot.com",
+  messagingSenderId: "869116496566",
+  appId: "1:869116496566:web:7bde057c33d64d7e0af417",
+  measurementId: "G-520FZHWMK2"
+};
+
 
 const servers = {
   iceServers:  [
@@ -16,12 +18,20 @@ const servers = {
   iceCandidatePoolSize: 10,
 }
 
+const mySocialLinks = {
+	github: 'https://github.com/prateek332',
+	instagram: 'https://www.instagram.com/prateekator/',
+	twitter: 'https://www.twitter.com/prateekator',
+	portfolio: 'https://prateekinfo.in',
+}
+
 const config = {
 	'firebaseConfig': firebaseConfig,
 	'servers': servers,
 	'callDocument': 'calls',
 	'newConnections': 'newConnections',
 	'removeConnections': 'removeConnections',
+	'socialLinks': mySocialLinks,
 }
 
 export default Object.freeze(config);

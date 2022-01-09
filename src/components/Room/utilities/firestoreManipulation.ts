@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, DocumentReference, Firestore } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, Firestore } from "firebase/firestore";
 import Peer from "peerjs";
 import appConfig from "../../../app.config";
 
@@ -43,4 +43,4 @@ export {
   addMyPeerDocument,
   addDisconnectCallDocument,
   removeMyPeerIdDocument,
-}
+};

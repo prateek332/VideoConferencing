@@ -2,10 +2,10 @@ import { Firestore } from 'firebase/firestore';
 import Peer from 'peerjs';
 import { useContext, useState } from 'react';
 import { AppContext } from '../../../App';
-import { addMyPeerDocument, removeMyPeerIdDocument } from '../utilities/firestoreManipulation';
-
 import cameraIcon from '../../../assets/icons/camera.svg';
 import micIcon from '../../../assets/icons/mic.svg';
+import { addMyPeerDocument, removeMyPeerIdDocument } from '../utilities/firestoreManipulation';
+
 
 const commonButtonStyle = "p-2 w-28 flex justify-between rounded-3xl transition ease-in hover:scale-110"
 const greenButtonStyle = "bg-green-500 hover:bg-green-400"

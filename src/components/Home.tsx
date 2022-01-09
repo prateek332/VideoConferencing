@@ -1,11 +1,11 @@
-import { FirebaseApp } from "firebase/app";
-import { addDoc, collection, doc, Firestore, getDoc, updateDoc } from "firebase/firestore";
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { addDoc, collection, doc, Firestore, getDoc } from "firebase/firestore";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
 import appConfig from "../app.config";
-
 import logoImage from '../assets/icons/logo.svg';
+import Footer from "./Footer";
+
 
 const usernameWarningMessage = `Username is required and must be btw 5 to 20 characters`;
 const roomIdWarningMessage = `Either room id is incorrect or room doesn't exist`;
@@ -28,8 +28,9 @@ export default function Home() {
 
   // checking if username is saved in local storage
   useEffect(() => {
-    setUsername(getUsername());
-  },[]);
+    if (setUsername) 
+      setUsername(getUsername());
+  }, []);
 
   const onUsernameSubmit = () => {
     if (_onUsernameSubmitUtility(username)) {
@@ -57,107 +58,114 @@ export default function Home() {
   }
 
   return (
-    <div className="waves-background flex flex-col md:flex-row flex-wrap md:justify-center items-center h-full w-full">
+    <div className="waves-background flex flex-col justify-center items-center h-screen w-screen">
 
-      {/* User greeting, username input box, room-id input box */}
-      <div className="flex flex-col items-center mt-10 md:mt-0 mb-14 md:mb-0">
+      <div className="flex flex-wrap w-full justify-center items-center">
+        {/* User greeting, username input box, room-id input box */}
+        <div className="flex flex-col items-center mt-10 md:mt-0 mb-14 md:mb-0">
 
-        {/* user  greeting */}
-        <div className="w-72 md:w-9/12 mb-8 text-2xl md:text-3xl text-center">
-          Hi👋🏻, enter a username to start chatting with your friends
-        </div>
-
-        {/* username input box and incorrect username warning */}
-        <div className="flex flex-col justify-center items-center">
-
-          {/* username input box and submit button */}
-          <div>
-            <input
-              type="text"
-              placeholder="username..."
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className="p-2 m-3 w-44 md:w-64 text-green-800 bg-white rounded-2xl 
-              text-xl border-0 shadow outline-none focus:outline-none focus:ring"
-            />
-
-            <button
-              onClick={_ => onUsernameSubmit()}
-              className="p-1 w-16 md:w-20 md:h-10 bg-green-600 rounded-3xl font-bold text-white text-xl
-              transition duration-300 ease-in-out hover:bg-green-400 hover:scale-110"
-            >🚀Go</button>
+          {/* user  greeting */}
+          <div className="w-72 md:w-9/12 mb-8 text-2xl md:text-3xl text-center">
+            Hi👋🏻, enter a username to create a chat room
           </div>
 
-          {/* username warning */}
-          <div className={`text-red-600 text-base w-72 text-center md:w-full md:text-xl ${usernameWarning ? '' : 'hidden'}`}>
-            {usernameWarningMessage}
-          </div>
+          {/* username input box and incorrect username warning */}
+          <div className="flex flex-col justify-center items-center">
 
-        </div>
+            {/* username input box and submit button */}
+            <div>
+              <input
+                type="text"
+                placeholder="username..."
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                className="p-2 m-3 w-44 md:w-64 text-green-800 bg-white rounded-2xl 
+                text-xl border-0 shadow outline-none focus:outline-none focus:ring"
+              />
 
-        <div className="p-2 m-2 text-4xl font-semibold">
-          Or
-        </div>
-
-        {/* room id input box */}
-        <div className="p-2 m-2 w-72 md:w-9/12 flex flex-col items-center">
-          <div className="text-center text-2xl md:text-3xl">
-            Enter room-link or room-id to join a chat room
-          </div>
-          <div className="flex justify-center items-center">
-            <input
-              type="text"
-              ref={roomIdRef}
-              placeholder="room id..."
-              className="p-2 m-3 w-44 md:w-64 text-green-800 bg-white rounded-2xl
-              text-xl border-0 shadow outline-none focus:outline-none focus:ring"
-            />
-            <button
-              onClick={_ => onRoomIdSubmit()}
-              className="p-1 w-20 h-10 md:w-20 md:h-10 bg-green-600 rounded-3xl font-bold text-white text-xl
-              transition duration-300 ease-in-out hover:bg-green-400 hover:scale-110"
-            >🚪Join</button>
-          </div>
-
-            {/* roomId warning */}
-            <div className={`text-red-600 text-base w-72 text-center md:w-full md:text-xl ${roomIdWarning ? '' : 'hidden'}`}>
-              {roomIdWarningMessage}
+              <button
+                onClick={_ => onUsernameSubmit()}
+                className="p-1 w-16 md:w-20 md:h-10 bg-green-600 rounded-3xl font-bold text-white text-xl
+                transition duration-300 ease-in-out hover:bg-green-400 hover:scale-110"
+              >🚀Go</button>
             </div>
-            
+
+            {/* username warning */}
+            <div className={`text-red-600 text-base w-72 text-center md:w-full md:text-xl ${usernameWarning ? '' : 'hidden'}`}>
+              {usernameWarningMessage}
+            </div>
+
+          </div>
+
+          <div className="p-2 m-2 text-4xl font-semibold">
+            Or
+          </div>
+
+          {/* room id input box */}
+          <div className="p-2 m-2 w-72 md:w-9/12 flex flex-col items-center">
+            <div className="text-center text-2xl md:text-3xl">
+              Enter room-link or room-id to join a chat room
+            </div>
+            <div className="flex justify-center items-center">
+              <input
+                type="text"
+                ref={roomIdRef}
+                placeholder="room id..."
+                className="p-2 m-3 w-44 md:w-64 text-green-800 bg-white rounded-2xl
+                text-xl border-0 shadow outline-none focus:outline-none focus:ring"
+              />
+              <button
+                onClick={_ => onRoomIdSubmit()}
+                className="p-1 w-20 h-10 md:w-20 md:h-10 bg-green-600 rounded-3xl font-bold text-white text-xl
+                transition duration-300 ease-in-out hover:bg-green-400 hover:scale-110"
+              >🚪Join</button>
+            </div>
+
+              {/* roomId warning */}
+              <div className={`text-red-600 text-base w-72 text-center md:w-full md:text-xl ${roomIdWarning ? '' : 'hidden'}`}>
+                {roomIdWarningMessage}
+              </div>
+              
+          </div>
+
         </div>
 
+        {/* site logo and webcam stream*/}
+        <div className="flex flex-col justify-between items-center">
+          <div>
+            {
+              !showLocalFeed &&
+                <div className="w-36 lg:w-64 mb-8">
+                  <img src={logoImage} alt="logo" />
+                </div>
+            }
+
+            <video 
+              id="localStreamHome" 
+              autoPlay 
+              muted 
+              playsInline
+              hidden
+              className="w-40 md:w-72 lg:w-96 xl:w-4/5 2xl:w-full border-4 border-green-400 rounded-3xl transition-all duration-300 ease-in-out"
+            ></video>
+
+          </div>
+          
+          <div>
+            <button
+              id="startWebcamButton"
+              onClick={_ => onWebcamButtonClick(setShowLocalFeed, setLocalStream)}
+              className="p-1 w-40 bg-yellow-400 rounded-3xl font-bold text-gray-700 text-xl
+              transition duration-200 ease-in-out hover:bg-yellow-300 hover:scale-110"
+            >Test Webcam</button>
+          </div>
+
+        </div>
       </div>
 
-      {/* site logo and webcam stream*/}
-      <div className="flex flex-col justify-between items-center">
-        <div>
-          {
-            !showLocalFeed &&
-              <div className="w-44 lg:w-64 mb-8">
-                <img src={logoImage} alt="logo" />
-              </div>
-          }
-
-          <video 
-            id="localStreamHome" 
-            autoPlay 
-            muted 
-            playsInline
-            hidden
-            className="w-64 md:w-72 lg:w-96 xl:w-4/5 2xl:w-full border-4 border-green-400 rounded-3xl transition-all duration-300 ease-in-out"
-          ></video>
-
-        </div>
-        
-        <div>
-          <button
-            id="startWebcamButton"
-            onClick={_ => onWebcamButtonClick(setShowLocalFeed, setLocalStream)}
-            className="p-1 w-40 bg-yellow-500 rounded-3xl font-bold text-blue-800 text-xl
-            transition duration-200 ease-in-out hover:bg-yellow-400 hover:scale-110"
-          >Start Webcam</button>
-        </div>
-
+      {/* footer */}
+      <div className="footer absolute sm:p-2 sm:w-3/6 bg-slate-600 bg-opacity-20 rounded-3xl">
+        <Footer />
       </div>
 
     </div>
@@ -226,5 +234,5 @@ type LocalStream = (showLocalFeed: MediaStream | null) => void;
 
 export {
   _onRoomIdSubmitUtility
-}
+};
 

@@ -2,6 +2,7 @@ import { Firestore } from 'firebase/firestore'
 import { createContext, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './components/Home'
+import NotFound from './components/NotFound'
 import Rating from './components/Rating/Rating'
 import Room from './components/Room/Room'
 import RoomWithoutUsername from './components/Room/RoomWithoutUsername'
@@ -36,6 +37,7 @@ function App() {
             }
           </Route>
           <Route path="/rating" element={<Rating />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </AppContext.Provider>
@@ -52,3 +54,4 @@ interface Memo {
 
 export default App
 export { AppContext }
+

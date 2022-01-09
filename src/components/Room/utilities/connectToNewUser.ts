@@ -1,7 +1,7 @@
 import Peer from "peerjs";
+import remoteStreamPosterIcon from '../../../assets/icons/remoteStreamPoster.svg';
 import adjustVideoGridLayout from "./adjustStreamsLayout";
 
-import remoteStreamPosterIcon from '../../../assets/icons/remoteStreamPoster.svg';
 
 export default async function connectToNewUser(myPeer: Peer | undefined, remoteUserIds: string[], localStream: MediaStream) {
  
