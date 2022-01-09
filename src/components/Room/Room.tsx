@@ -28,11 +28,8 @@ export default function Room() {
   
   // get local video stream, set it to localStream and display it on the page
   useLayoutEffect(() => {
-    
     if (localStream !== null) {
-      const myVideo = document.getElementById("localStreamRoom") as HTMLVideoElement;
-      myVideo.srcObject = localStream;
-      myVideo.muted = true;
+      addLocalStreamToLocalDiv(localStream);
     } else {
       getLocalVideo()
         .then(stream => {
@@ -40,7 +37,6 @@ export default function Room() {
         })
     }
   }, [localStream]);
-
   
   // generate peerId and write it to firestore and listen for new connections
   useEffect(() => {
@@ -107,6 +103,32 @@ export default function Room() {
     }
   }, [localStream]);
 
+  // useLayoutEffect(() => {
+  //   const streams = document.getElementById("streams");
+  //   if (streams) {
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //     streams.appendChild(getNewVideoElem());
+  //   }
+  // }, []);
+
+  const getNewVideoElem = () => {
+    const newVideoElem = document.createElement('video');
+    newVideoElem.src = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    newVideoElem.muted;
+    newVideoElem.play();
+    return newVideoElem;
+  }
+
   return (
     <div className="waves-background grid grid-cols-1 grid-rows-6 w-screen h-screen justify-items-center">
 
@@ -115,9 +137,9 @@ export default function Room() {
         id="streams"
         className="justify-items-center"
       >
-        <video
-          id="localStreamRoom" autoPlay playsInline poster={localStreamPosterIcon}
-        />
+        <div id="localStreamRoomDiv">
+          <video autoPlay playsInline poster={localStreamPosterIcon} />
+        </div>
       </div>
 
        {/* controls and share link */}
@@ -153,4 +175,13 @@ export default function Room() {
 async function getLocalVideo() {
   const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true});
   return stream;
+}
+
+function addLocalStreamToLocalDiv(localStream: MediaStream) {
+  const localStreamRoomDivElement = document.getElementById('localStreamRoomDiv');
+  if (localStreamRoomDivElement) {
+    const localVideo = localStreamRoomDivElement.firstChild as HTMLVideoElement;
+    localVideo.srcObject = localStream;
+    localVideo.muted = true;
+  }
 }
