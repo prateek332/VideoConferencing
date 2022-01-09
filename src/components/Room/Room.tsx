@@ -137,7 +137,7 @@ export default function Room() {
         id="streams"
         className="justify-items-center"
       >
-        <div id="localStreamRoomDiv">
+        <div id="localVideoRoomDiv">
           <video autoPlay playsInline poster={localStreamPosterIcon} />
         </div>
       </div>
@@ -178,7 +178,7 @@ async function getLocalVideo() {
 }
 
 function addLocalStreamToLocalDiv(localStream: MediaStream) {
-  const localStreamRoomDivElement = document.getElementById('localStreamRoomDiv');
+  const localStreamRoomDivElement = document.getElementById('localVideoRoomDiv');
   if (localStreamRoomDivElement) {
     const localVideo = localStreamRoomDivElement.firstChild as HTMLVideoElement;
     localVideo.srcObject = localStream;

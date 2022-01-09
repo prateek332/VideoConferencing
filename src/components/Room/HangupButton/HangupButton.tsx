@@ -24,6 +24,7 @@ export default function HangupButton(props: Props) {
   const {
     db,
     username,
+    setLocalStream,
   } = useContext(AppContext);
 
   const {
@@ -60,7 +61,7 @@ export default function HangupButton(props: Props) {
         children={undefined}
         submitButton
         submitButtonMessage="Yes"
-        submitButtonFunc={() => dialogSubmitButtonFunc(db, myPeer, myPeerDocId, username, roomId, setIsOpen, navigate)}
+        submitButtonFunc={() => dialogSubmitButtonFunc(db, myPeer, myPeerDocId, username, roomId, setIsOpen, navigate, setLocalStream)}
         cancelButton
         cancelButtonMessage="No"
         cancelButtonFunc={() => setIsOpen(false)}
@@ -76,10 +77,11 @@ async function dialogSubmitButtonFunc(
   username: string,
   roomId: string,
   setIsOpen: any, 
-  navigate: any
+  navigate: any,
+  setLocalStream: any
   ) {
 
-  await disconnectMyCall(db, myPeer, myPeerDocId, roomId, username);
+  await disconnectMyCall(db, myPeer, myPeerDocId, roomId, username, setLocalStream);
   setIsOpen(false);
   navigate('/rating', { state: { roomId: roomId} });
 }
@@ -89,26 +91,19 @@ async function disconnectMyCall(
   myPeer: Peer | undefined,
   myPeerDocId: string, 
   roomId: string, 
-  username: string
+  username: string,
+  setLocalStream: any
   ) {
   addDisconnectCallDocument(db, roomId, username, myPeer)
     .then(res => {
-      if (res == true) {
-        removeLocalVideo();
+      if (res === true) {
+        setLocalStream(null);
       }
       else
         console.log('cannot disconnect, something went wrong');
     })
   
   removeMyPeerIdDocument(db, roomId, myPeerDocId);
-}
-
-async function removeLocalVideo() {
-  const localStream = document.getElementById("localStreamRoom") as HTMLVideoElement; 
-  if (localStream) {
-    localStream.srcObject = null;
-    localStream.remove();
-  }
 }
 
 const alertUser = (event: any) => {

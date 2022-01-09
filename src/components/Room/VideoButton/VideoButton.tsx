@@ -87,7 +87,8 @@ function disableMyStream(
 }
 
 function toggleLocalStream(localStream: MediaStream | null) {
-  const localVideo = document.getElementById("localStreamRoom") as HTMLVideoElement;
+  const localVideoRoomDivElement = document.getElementById("localVideoRoomDiv");
+  const localVideo = localVideoRoomDivElement?.firstChild as HTMLVideoElement;
   if (localVideo.srcObject !== null) {
     localVideo.srcObject = null;
     localVideo.style.objectFit = "none";
