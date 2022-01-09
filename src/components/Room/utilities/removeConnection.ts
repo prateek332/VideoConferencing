@@ -1,25 +1,28 @@
 import adjustVideoGridLayout from "./adjustStreamsLayout";
 
 export default async function removeConnection(remotePeerIdsArray: string[]) {
+
   if (remotePeerIdsArray.length > 0) {
 
     remotePeerIdsArray.forEach(async remotePeerId => {
 
-      const remoteVideoElement = document.getElementById(remotePeerId);
+      const remoteDivElement = document.getElementById(remotePeerId) as HTMLDivElement;
 
-      if (remoteVideoElement) {
+      if (remoteDivElement) {
+
+        // remove the video element inside the remoteDivElement
+        remoteDivElement.firstChild?.remove();
         
         // get the streams grid element
-        const streams = document.getElementById("streams") as HTMLDivElement;
+        const streamsElem = document.getElementById("streams") as HTMLDivElement;
 
-        if (streams) {
+        if (streamsElem) {
           // remove the remote video element and adjust the grid
-          streams.removeChild(remoteVideoElement);
-          adjustVideoGridLayout(streams.childElementCount, streams);
+          streamsElem.removeChild(remoteDivElement);
+          // adjust the grid layout
+          adjustVideoGridLayout(streamsElem.childElementCount, streamsElem);
         }
-
-        // remove the video element
-        remoteVideoElement.remove();
+        
       }
     })
   }
