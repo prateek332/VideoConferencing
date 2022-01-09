@@ -7,44 +7,61 @@ export default async function connectToNewUser(myPeer: Peer | undefined, remoteU
  
   if (myPeer) {
 
-    const streams = document.getElementById('streams') as HTMLDivElement;
+    const streamsElem = document.getElementById('streams') as HTMLDivElement;
     
-    if (streams !== null) {
+    if (streamsElem !== null) {
 
       remoteUserIds.forEach(remoteId => {
 
+        // call new user and give them our local media stream
         const call = myPeer.call(remoteId, localStream);
 
+        // these variables are used when a fresh new user connects to the room
+        let newRemoteDivElement: HTMLDivElement;
         let newRemoteVideoElement: HTMLVideoElement;
 
+        // when new user reply, they will send us their media stream
         call.on('stream', remoteUserStream => {
           
           // check to see if user already has a video element
-          const remoteVideoElement = document.getElementById(remoteId) as HTMLVideoElement;
+          const remoteDivElement = document.getElementById(remoteId) as HTMLDivElement;
 
-          if (remoteVideoElement) {
+          if (remoteDivElement) {
+            const remoteVideoElement = remoteDivElement.firstChild as HTMLVideoElement;
             remoteVideoElement.srcObject = remoteUserStream;
           }
-          // if not, create a new remote video element and add it to the grid 
+          // if not, create a new remote video element and add it to the grid
           else {
+            newRemoteDivElement = document.createElement('div');
+            newRemoteDivElement.id = remoteId;
+            
             newRemoteVideoElement = document.createElement('video');
-            newRemoteVideoElement.id = remoteId;
             newRemoteVideoElement.srcObject = remoteUserStream;
             newRemoteVideoElement.poster = remoteStreamPosterIcon;
             newRemoteVideoElement.addEventListener('loadedmetadata', () => {
               newRemoteVideoElement.play();
             })
+
             // append the new remote video element to the grid
-            streams.appendChild(newRemoteVideoElement);
-            adjustVideoGridLayout(streams.childElementCount, streams);
+            newRemoteDivElement.appendChild(newRemoteVideoElement);
+            streamsElem.appendChild(newRemoteDivElement);
+
+            // adjust the grid layout
+            adjustVideoGridLayout(streamsElem.childElementCount, streamsElem);
           }
         });
 
         // remove the remote video element when the call is ended
         call.on('close', () => {
-          if (newRemoteVideoElement !== undefined && newRemoteVideoElement !== null) {
-            newRemoteVideoElement.remove();
-            adjustVideoGridLayout(streams.childElementCount, streams);
+          if (newRemoteDivElement) {
+
+            // remove the remote video element from the grid
+            newRemoteDivElement.firstChild?.remove();
+            newRemoteDivElement.remove();
+
+            // adjust the grid layout
+            adjustVideoGridLayout(streamsElem.childElementCount, streamsElem);
+            
           }
         });
 
