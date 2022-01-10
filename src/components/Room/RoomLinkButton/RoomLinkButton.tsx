@@ -15,11 +15,11 @@ export default function RoomLinkButton() {
   })
 
   return (
-    <div className="flex p-2 h-12 text-xl bg-slate-100 text-blue-800 rounded-2xl">
+    <div className="flex p-2 h-10 text-xl bg-slate-100 text-blue-800 rounded-2xl">
       <input 
         id="shareLink" type="text" readOnly
         value={`${window.location.origin}/${params.roomId}`}
-        className="bg-transparent cursor-pointer"
+        className="bg-transparent cursor-pointer font-thin text-gray-500"
         onClick={() => {
           setIsOpen(true);
           copyToClipboard(); 
@@ -31,12 +31,11 @@ export default function RoomLinkButton() {
           setIsOpen(true);
           copyToClipboard(); 
           setTimeout(() => setIsOpen(false), 700);
-        }} 
-        className="p-1"
+        }}
       >
         <img
           src={copyIcon}
-          className="w-full h-full bg-slate-200 transition ease-in hover:scale-125"
+          className="w-full h-full bg-slate-200 transition ease-in hover:scale-125 hover:bg-pink-300 rounded-sm"
           alt="copy"
         />
       </button>

@@ -132,21 +132,21 @@ export default function Home() {
 
         {/* site logo and webcam stream*/}
         <div className="flex flex-col justify-between items-center">
-          <div>
+          <div className="flex justify-center items-center">
             {
               !showLocalFeed &&
                 <div className="w-36 lg:w-64 mb-8">
                   <img src={logoImage} alt="logo" />
                 </div>
             }
-
+            
             <video 
               id="localStreamHome" 
               autoPlay 
               muted 
               playsInline
               hidden
-              className="w-40 md:w-72 lg:w-96 xl:w-4/5 2xl:w-full border-4 border-green-400 rounded-3xl transition-all duration-300 ease-in-out"
+              className="w-40 md:w-6/12 lg:w-96 xl:w-4/5 2xl:w-full border-4 border-green-400 rounded-3xl transition-all duration-300 ease-in-out"
             ></video>
 
           </div>
@@ -164,7 +164,7 @@ export default function Home() {
       </div>
 
       {/* footer */}
-      <div className="footer absolute sm:p-2 sm:w-3/6 bg-slate-600 bg-opacity-20 rounded-3xl">
+      <div className="footer">
         <Footer />
       </div>
 

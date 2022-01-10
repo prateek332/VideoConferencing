@@ -7,7 +7,7 @@ import micIcon from '../../../assets/icons/mic.svg';
 import { addMyPeerDocument, removeMyPeerIdDocument } from '../utilities/firestoreManipulation';
 
 
-const commonButtonStyle = "p-2 w-28 flex justify-between rounded-3xl transition ease-in hover:scale-110"
+const commonButtonStyle = "p-2 w-24 flex justify-between rounded-3xl transition ease-in hover:scale-125"
 const greenButtonStyle = "bg-green-500 hover:bg-green-400"
 const redButtonStyle = "bg-red-500 hover:bg-red-400"
 
@@ -49,8 +49,8 @@ export default function VideoButton(props: Props) {
           }
         }
       >
-        <img src={micIcon} className="w-10 h-10" alt="camera"/>
-        <img src={cameraIcon} className="w-10 h-10" alt="camera"/>
+        <img src={micIcon} className="w-8 h-7" alt="camera"/>
+        <img src={cameraIcon} className="w-8 h-7" alt="camera"/>
       </button>
     </div>
   )

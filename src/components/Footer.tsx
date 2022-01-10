@@ -12,7 +12,7 @@ export default function Footer() {
   const commonCss = `w-12 h-12 m-4 transition duration-500 ease-in-out transform hover:scale-150 text-center text-xs font-medium`;
 
   return (
-    <div className="flex flex-row flex-wrap justify-center items-center">
+    <div className="flex flex-wrap justify-center items-center">
 
       {/* portfolio */}
       <a

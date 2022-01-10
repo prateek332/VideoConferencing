@@ -23,40 +23,30 @@ body {
 }
 
 #streams {
-  margin-top: 20px;
-  grid-row: 1/ span 5;
+  grid-row: 1 / span 6;
+  overflow: hidden;
+  position: relative;
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   grid-auto-rows: 1fr;
-  grid-gap: 10px;
-  justify-content: center;
-  align-items: center;
-  overflow-y: scroll;
-  width: 80%;
+  grid-gap: 5px;
+  width: calc(100%);
 }
 
-#streams video {
-  @apply w-full h-4/5 sm:w-full sm:h-full;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: cover;
-  @apply border-2 bg-red-400 border-lime-400 rounded-xl transition ease-in-out hover:scale-125;
+#streams div {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  direction: ltr;
 }
 
-#streams {
-  scroll-behavior: smooth;
-}
-
-#streams::-webkit-scrollbar {
-  width: 0.25rem;
-}
-
-#streams-webkit-scrollbar-track {
-  background: #1e1e24;
-}
-
-#streams-webkit-scrollbar-thumb {
-  background: #6649b8;
+#streams div video {
+  height: calc(100% + 2px);
+  width: calc(100% + 2px);
+  position: absolute;
+  top: -1px;
+  @apply border-2 rounded-3xl object-cover md:object-none;
 }
 
 .waves-background {
@@ -76,21 +66,20 @@ body {
   z-index: 10;
 }
 
-@media screen and (max-width: 463px) {
+.footer {
+  @apply bg-slate-500 bg-opacity-20 rounded-3xl;
+  width: 40%;
+  margin-top: 2%;
+}
+
+@media screen and (max-width: 1000px) {
   .footer {
     display: flex;
     position: absolute;
-    bottom: 0;
-    height: 100vh;
-    width: 17%;
+    height: 90vh;
+    width: 13%;
     left: 0;
     justify-content: center;
     align-items: stretch;
-  }
-}
-
-@media screen and (min-width: 464px) {
-  .footer {
-    @apply bottom-12;
   }
 }

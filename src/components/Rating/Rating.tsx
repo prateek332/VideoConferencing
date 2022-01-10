@@ -25,7 +25,7 @@ export default function Rating() {
   }
 
   return (
-    <div className="waves-background w-full h-full flex flex-col flex-wrap justify-center items-center">
+    <div className="waves-background w-screen h-screen flex flex-col justify-center items-center">
       
       <div className="w-full flex flex-col flex-wrap justify-center items-center">
         {thankyouMessage()}
@@ -33,7 +33,7 @@ export default function Rating() {
       </div>
 
       {/* footer */}
-      <div className="mt-5 footer sm:p-2 sm:w-3/6 bg-slate-600 bg-opacity-20 rounded-3xl">
+      <div className="footer">
         <Footer />
       </div>
     </div>

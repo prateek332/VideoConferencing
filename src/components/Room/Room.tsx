@@ -103,42 +103,15 @@ export default function Room() {
     }
   }, [localStream]);
 
-  // useLayoutEffect(() => {
-  //   const streams = document.getElementById("streams");
-  //   if (streams) {
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //     streams.appendChild(getNewVideoElem());
-  //   }
-  // }, []);
-
-  const getNewVideoElem = () => {
-    const newVideoElem = document.createElement('video');
-    newVideoElem.src = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-    newVideoElem.muted;
-    newVideoElem.play();
-    return newVideoElem;
-  }
-
   return (
-    <div className="waves-background grid grid-cols-1 grid-rows-6 w-screen h-screen justify-items-center">
+    <div className="fixed waves-background grid grid-cols-1 grid-rows-6 w-screen h-screen justify-items-center">
 
        {/* streams */}
       <div
         id="streams"
-        className="justify-items-center"
       >
         <div id="localVideoRoomDiv">
-          <video autoPlay playsInline poster={localStreamPosterIcon} />
+          <video autoPlay playsInline poster={localStreamPosterIcon} style={{'objectFit': 'cover'}} />
         </div>
       </div>
 
@@ -146,7 +119,7 @@ export default function Room() {
       <div className="flex flex-wrap justify-center items-center">
 
         {/* controls => cam_button, hangup_button */}
-        <div className="p-2 flex w-56 sm:mr-12 mb-2 justify-between items-center">
+        <div className="p-2 flex w-48 sm:mr-12 mb-2 justify-between items-center">
 
           <VideoButton 
             myPeer={myPeer} 

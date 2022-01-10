@@ -48,10 +48,10 @@ export default function HangupButton(props: Props) {
     <div>
       <button 
         id="hangupButton"
-        className="p-1 h-14 bg-red-500 rounded-full transition ease-in hover:scale-110 hover:bg-red-400"
+        className="p-1 h-10 bg-red-500 rounded-full transition ease-in hover:scale-125 hover:bg-red-400"
         onClick={() => setIsOpen(true)}
       >
-        <img src={phoneHangupIcon} className="w-12 h-10" alt="hangup"/>
+        <img src={phoneHangupIcon} className="w-8 h-7" alt="hangup"/>
       </button>
       <MyDialog
         isOpen={isOpen}
