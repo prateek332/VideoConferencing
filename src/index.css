@@ -69,7 +69,8 @@ body {
 .footer {
   @apply bg-slate-500 bg-opacity-20 rounded-3xl;
   width: 40%;
-  margin-top: 2%;
+  position: absolute;
+  bottom: 40px;
 }
 
 @media screen and (max-width: 1000px) {

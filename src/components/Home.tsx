@@ -60,6 +60,7 @@ export default function Home() {
   return (
     <div className="waves-background flex flex-col justify-center items-center h-screen w-screen">
 
+      {/* not footer */}
       <div className="flex flex-wrap w-full justify-center items-center">
         {/* User greeting, username input box, room-id input box */}
         <div className="flex flex-col items-center mt-10 md:mt-0 mb-14 md:mb-0">

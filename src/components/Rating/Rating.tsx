@@ -27,7 +27,7 @@ export default function Rating() {
   return (
     <div className="waves-background w-screen h-screen flex flex-col justify-center items-center">
       
-      <div className="w-full flex flex-col flex-wrap justify-center items-center">
+      <div className="absolute top-0 w-full flex flex-col flex-wrap justify-center items-center">
         {thankyouMessage()}
         {rejoinCall(roomId || "", navigate)}
       </div>

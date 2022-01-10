@@ -54,6 +54,7 @@ export default async function connectToNewUser(myPeer: Peer | undefined, remoteU
 
         // remove the remote video element when the call is ended
         call.on('close', () => {
+          console.log('peer closed');
           if (newRemoteDivElement) {
 
             // remove the remote video element from the grid
